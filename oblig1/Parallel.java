@@ -1,3 +1,5 @@
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.PriorityQueue;
 
 /**
@@ -13,7 +15,6 @@ public class Parallel {
 
         Thread[] threads = new Thread[processors];
         for (int i = 0; i < processors; i++) {
-
             int segment_end = segment_start + segment_length;
             if(i == processors - 1){
                 segment_end += a.length % processors;
@@ -37,17 +38,17 @@ public class Parallel {
             } catch (InterruptedException e) {}
         }
 
-        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        PriorityQueue<Integer> heap = new PriorityQueue<>(Collections.reverseOrder());
         for (int i = 0; i < result_bucket.length; i++) {
-            for (int j = 0; i < k; i++) {
+            for (int j = 0; j < result_bucket[i].length; j++) {
                 heap.add(result_bucket[i][j]);
             }
         }
-
         int[] result = new int[k];
         for (int i = 0; i < k; i++) {
             result[i] = heap.remove();
         }
+
 
         return result;
     }
