@@ -4,20 +4,20 @@
 public class Worker implements Runnable{
     private int id;
     private int segment_start;
-    private int segment_length;
+    private int segment_end;
     private int[] to_sort;
     private int[][] result_bucket;
     private int k;
 
     public Worker(  int id, 
                     int segment_start, 
-                    int segment_length, 
+                    int segment_end, 
                     int[] to_sort, 
                     int[][] result_bucket,
                     int k){
         this.id = id;
         this.segment_start = segment_start;
-        this.segment_length = segment_length;
+        this.segment_end = segment_end;
         this.to_sort = to_sort;
         this.result_bucket = result_bucket;
         this.k = k;
@@ -35,12 +35,8 @@ public class Worker implements Runnable{
                 j --;
             }
         }
-
-
-        for (   int i = this.segment_start + k; 
-                i < this.segment_start + this.segment_length - 1; 
-                i++) 
-        {
+            
+        for (int i = this.segment_start + k; i < this.segment_end - 1; i++) {
             if(this.to_sort[i] > this.to_sort[this.segment_start + k - 1]){
                 swap(this.to_sort, i, this.segment_start + k - 1);
                 int key = this.segment_start + k - 1;
