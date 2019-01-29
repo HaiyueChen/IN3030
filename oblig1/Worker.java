@@ -29,19 +29,19 @@ public class Worker implements Runnable{
         for (int i = this.segment_start; i < this.segment_start + k; i++) {
             int key = i;
             int j = i - 1;
-            while(j >= 0 && this.to_sort[key] > this.to_sort[j]){
+            while(j >= this.segment_start && this.to_sort[key] > this.to_sort[j]){
                 swap(this.to_sort, key, j);
                 key --;
                 j --;
             }
         }
-            
-        for (int i = this.segment_start + k; i < this.segment_end - 1; i++) {
+        
+        for (int i = this.segment_start + k; i < this.segment_end; i++) {
             if(this.to_sort[i] > this.to_sort[this.segment_start + k - 1]){
                 swap(this.to_sort, i, this.segment_start + k - 1);
                 int key = this.segment_start + k - 1;
                 int j = key - 1;
-                while(j >= 0 && to_sort[key] > to_sort[j]){
+                while(j >= this.segment_start && to_sort[key] > to_sort[j]){
                     swap(to_sort, key, j);
                     key --;
                     j --;                

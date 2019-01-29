@@ -13,7 +13,7 @@ public class Sequential {
                 j --;
             }
         }
-        for (int i = k; i < a.length - 1; i++) {
+        for (int i = k - 1; i < a.length; i++) {
             if(a[i] > a[k - 1]){
                 swap(a, i, k - 1);
                 int key = k - 1;

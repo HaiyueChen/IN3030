@@ -19,6 +19,7 @@ public class Parallel {
             if(i == processors - 1){
                 segment_end += a.length % processors;
             }
+           // System.out.println(segment_start + "  " + segment_end);
             threads[i] = new Thread(new Worker(i, 
                                               segment_start,
                                               segment_end, 
