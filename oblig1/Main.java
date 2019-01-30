@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -7,34 +8,29 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Main {
 
     public static void main(String[] args) {
-        for (int j = 0; j < 10000; j++) {
-            int[] a = new int[999999];
-            for (int i = 0; i < a.length; i++) {
-                a[i] = ThreadLocalRandom.current().nextInt(0,  999999999);
-            }
-    
-            int[] b = a.clone();
-            Arrays.sort(b);
-            b = reverse_array(b);
-            int[] sorted_correct = new int[10];
-            for (int i = 0; i < 10; i++) {
-                sorted_correct[i] = b[i];
-            }
-            
-            //System.out.println(Arrays.toString(sorted));
-            //System.out.println(Arrays.toString(sorted_correct));
-            //int[] sorted = Sequential.find_k_largest(a, 10);
-            int[] sorted = Parallel.find_k_largest(a, 10);
-            //sorted = new int[10];
-            System.out.println(j);
-            if(!check_correct(sorted_correct, sorted)){
-                System.out.println("wrong  " + j);
-                System.out.println(Arrays.toString(sorted));
-                System.out.println(Arrays.toString(sorted_correct));
-                break;
-            }
-            
-        }            
+        int n = Integer.valueOf(args[1]);
+        int k = Integer.valueOf(args[2]);
+
+
+        int[] a = new int[n];
+        Random rand = new Random(7361);
+        for (int i = 0; i < a.length; i++) {
+            a[i] = rand.nextInt(999999999);
+        }
+
+        int[] b = a.clone();
+        Arrays.sort(b);
+        b = reverse_array(b);
+        int[] sorted_correct = new int[10];
+        for (int i = 0; i < 10; i++) {
+            sorted_correct[i] = b[i];
+        }
+        long seq_start = System.nanoTime();
+        int[] sorted = Sequential.find_k_largest(a, 10);
+        System.out.println("Sequential time");
+        
+        sorted = Parallel.find_k_largest(a, 10);
+        //sorted = new int[10];
     }
 
     public static boolean check_correct(int[] correct, int[] answer){
