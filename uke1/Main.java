@@ -62,7 +62,6 @@ public class Main {
             try {
                 threads[i].join();
             } catch (InterruptedException e) {
-                //TODO: handle exception
             }
         }
 
