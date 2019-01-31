@@ -24,6 +24,7 @@ public class Main {
         for (int i = 0; i < random_array.length; i++) {
             random_array[i] = rand.nextInt(999999999);
         }
+        /*
         for (int z = 0; z < 7; z++) {
             int[] sorted = random_array.clone();
             long arrays_start = System.nanoTime();
@@ -36,6 +37,7 @@ public class Main {
             arrays_times[z] = arrays_time;
             
         }
+        */
 
         //Sequential computing
         for (int z = 0; z < 7; z++) {
@@ -81,10 +83,12 @@ public class Main {
         //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
         
         //System.out.println("Total time: " + (System.nanoTime() - total_start));
+        /*
         System.out.println("Arrays.sort");
         for (int i = 0; i < 7; i++) {
             System.out.println(arrays_times[i] / 1000);
         }
+        */
         System.out.println("Sequantial");
         for (int i = 0; i < 7; i++) {
             System.out.println(seq_times[i] / 1000);
