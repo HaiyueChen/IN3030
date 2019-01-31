@@ -7,11 +7,15 @@ import java.util.PriorityQueue;
  */
 public class Parallel {
 
-    public static int[] find_k_largest(int[] a, int k) {
+    public static int[] find_k_largest(int[] a, int k, int threads_to_run) {
         int processors = Runtime.getRuntime().availableProcessors();
+        if(processors > threads_to_run){
+            processors = threads_to_run; 
+        }
         int segment_start = 0;
         int segment_length = a.length / processors;
         int[][] result_bucket = new int[processors][k];
+        PriorityQueue<Integer> heap = new PriorityQueue<>(Collections.reverseOrder());
 
         Thread[] threads = new Thread[processors];
         for (int i = 0; i < processors; i++) {
@@ -19,7 +23,7 @@ public class Parallel {
             if(i == processors - 1){
                 segment_end += a.length % processors;
             }
-           // System.out.println(segment_start + "  " + segment_end);
+            //System.out.println(segment_start + "  " + segment_end);
             threads[i] = new Thread(new Worker(i, 
                                               segment_start,
                                               segment_end, 
@@ -39,7 +43,6 @@ public class Parallel {
             } catch (InterruptedException e) {}
         }
 
-        PriorityQueue<Integer> heap = new PriorityQueue<>(Collections.reverseOrder());
         for (int i = 0; i < result_bucket.length; i++) {
             for (int j = 0; j < result_bucket[i].length; j++) {
                 heap.add(result_bucket[i][j]);

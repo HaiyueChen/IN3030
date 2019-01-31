@@ -8,29 +8,99 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Main {
 
     public static void main(String[] args) {
-        int n = Integer.valueOf(args[1]);
-        int k = Integer.valueOf(args[2]);
+        long total_start = System.nanoTime();
 
-
-        int[] a = new int[n];
-        Random rand = new Random(7361);
-        for (int i = 0; i < a.length; i++) {
-            a[i] = rand.nextInt(999999999);
-        }
-
-        int[] b = a.clone();
-        Arrays.sort(b);
-        b = reverse_array(b);
-        int[] sorted_correct = new int[10];
-        for (int i = 0; i < 10; i++) {
-            sorted_correct[i] = b[i];
-        }
-        long seq_start = System.nanoTime();
-        int[] sorted = Sequential.find_k_largest(a, 10);
-        System.out.println("Sequential time");
+        int n = Integer.valueOf(args[0]);
+        int k = Integer.valueOf(args[1]);
         
-        sorted = Parallel.find_k_largest(a, 10);
-        //sorted = new int[10];
+        Long[] arrays_times = new Long[7];
+        Long[] seq_times = new Long[7];
+        Long[] two_threads_times = new Long[7];
+        Long[] four_threads_times = new Long[7];
+        Long[] eight_threads_times = new Long[7];
+
+        int[] random_array = new int[n];
+        Random rand = new Random(7361);
+        for (int i = 0; i < random_array.length; i++) {
+            random_array[i] = rand.nextInt(999999999);
+        }
+        for (int z = 0; z < 7; z++) {
+            int[] sorted = random_array.clone();
+            long arrays_start = System.nanoTime();
+            Arrays.sort(sorted);
+            int[] sorted_correct = new int[k];
+            for (int i = sorted.length - 1, count = 0; count < k; i--, count ++) {
+                sorted_correct[count] = sorted[i];
+            }
+            long arrays_time = (System.nanoTime() - arrays_start); 
+            arrays_times[z] = arrays_time;
+            
+        }
+
+        //Sequential computing
+        for (int z = 0; z < 7; z++) {
+            int[] sorted = random_array.clone();
+    
+            long seq_start = System.nanoTime();
+            sorted = Sequential.find_k_largest(sorted, k);
+            long seq_time = (System.nanoTime() - seq_start);
+            seq_times[z] = seq_time;
+            //System.out.println(String.format("Sequential time: %d ms",seq_time));
+            //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
+            
+        }
+
+        //Parallel computing
+        for (int z = 0; z < 7; z++) {
+            int[] sorted = random_array.clone();
+    
+            long para_start = System.nanoTime();
+            sorted = Parallel.find_k_largest(sorted, k, 2);
+            long para_time = (System.nanoTime() - para_start);
+            two_threads_times[z] = para_time; 
+        }
+        
+        for (int z = 0; z < 7; z++) {
+            int[] sorted = random_array.clone();
+    
+            long para_start = System.nanoTime();
+            sorted = Parallel.find_k_largest(sorted, k, 4);
+            long para_time = (System.nanoTime() - para_start);
+            four_threads_times[z] = para_time;
+        }
+        
+        for (int z = 0; z < 7; z++) {
+            int[] sorted = random_array.clone();
+    
+            long para_start = System.nanoTime();
+            sorted = Parallel.find_k_largest(sorted, k, 8);
+            long para_time = (System.nanoTime() - para_start);
+            eight_threads_times[z] = para_time;
+        }
+        //System.out.println(String.format("Parallel time: %d ms", para_time));
+        //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
+        
+        //System.out.println("Total time: " + (System.nanoTime() - total_start));
+        System.out.println("Arrays.sort");
+        for (int i = 0; i < 7; i++) {
+            System.out.println(arrays_times[i] / 1000);
+        }
+        System.out.println("Sequantial");
+        for (int i = 0; i < 7; i++) {
+            System.out.println(seq_times[i] / 1000);
+        }
+        System.out.println("Two threads");
+        for (int i = 0; i < 7; i++) {
+            System.out.println(two_threads_times[i] / 1000);
+        }
+        System.out.println("Four threads");
+        for (int i = 0; i < 7; i++) {
+            System.out.println(four_threads_times[i] / 1000);
+        }
+        System.out.println("Eight threads");
+        for (int i = 0; i < 7; i++) {
+            System.out.println(eight_threads_times[i] / 1000);
+        }
     }
 
     public static boolean check_correct(int[] correct, int[] answer){
