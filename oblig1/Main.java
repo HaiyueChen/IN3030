@@ -25,11 +25,11 @@ public class Main {
             random_array[i] = rand.nextInt(999999999);
         }
         /*
+        int[] sorted_correct = new int[k];
         for (int z = 0; z < 7; z++) {
             int[] sorted = random_array.clone();
             long arrays_start = System.nanoTime();
             Arrays.sort(sorted);
-            int[] sorted_correct = new int[k];
             for (int i = sorted.length - 1, count = 0; count < k; i--, count ++) {
                 sorted_correct[count] = sorted[i];
             }
@@ -47,7 +47,6 @@ public class Main {
             sorted = Sequential.find_k_largest(sorted, k);
             long seq_time = (System.nanoTime() - seq_start);
             seq_times[z] = seq_time;
-            //System.out.println(String.format("Sequential time: %d ms",seq_time));
             //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
             
         }
@@ -60,6 +59,7 @@ public class Main {
             sorted = Parallel.find_k_largest(sorted, k, 2);
             long para_time = (System.nanoTime() - para_start);
             two_threads_times[z] = para_time; 
+            //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
         }
         
         for (int z = 0; z < 7; z++) {
@@ -69,6 +69,7 @@ public class Main {
             sorted = Parallel.find_k_largest(sorted, k, 4);
             long para_time = (System.nanoTime() - para_start);
             four_threads_times[z] = para_time;
+            //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
         }
         
         for (int z = 0; z < 7; z++) {
@@ -78,11 +79,9 @@ public class Main {
             sorted = Parallel.find_k_largest(sorted, k, 8);
             long para_time = (System.nanoTime() - para_start);
             eight_threads_times[z] = para_time;
+            //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
         }
-        //System.out.println(String.format("Parallel time: %d ms", para_time));
-        //System.out.println("Correct? " + check_correct(sorted_correct , sorted));
         
-        //System.out.println("Total time: " + (System.nanoTime() - total_start));
         /*
         System.out.println("Arrays.sort");
         for (int i = 0; i < 7; i++) {
