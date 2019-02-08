@@ -90,19 +90,19 @@ public class Main {
         */
         System.out.println("Sequantial");
         for (int i = 0; i < 7; i++) {
-            System.out.println(seq_times[i] / 1000);
+            System.out.println(seq_times[i] / 1000000);
         }
         System.out.println("Two threads");
         for (int i = 0; i < 7; i++) {
-            System.out.println(two_threads_times[i] / 1000);
+            System.out.println(two_threads_times[i] / 1000000);
         }
         System.out.println("Four threads");
         for (int i = 0; i < 7; i++) {
-            System.out.println(four_threads_times[i] / 1000);
+            System.out.println(four_threads_times[i] / 1000000);
         }
         System.out.println("Eight threads");
         for (int i = 0; i < 7; i++) {
-            System.out.println(eight_threads_times[i] / 1000);
+            System.out.println(eight_threads_times[i] / 1000000);
         }
     }
 
