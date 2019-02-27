@@ -12,7 +12,7 @@ public class Example {
 		
 		// Process these from the command line
 		int seed = 42;
-		int n = 5;
+		int n = 1000;
 	
 		// Get the matrices
 		double[][] a = Oblig2Precode.generateMatrixA(seed, n);

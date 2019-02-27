@@ -121,10 +121,13 @@ class Oblig2Precode {
 	
 	
 	public static void saveResult(int seed, Mode mode, double[][] m) {
-
-		if(m.length > 100)
+        /*
+        if(m.length > 100){
+            System.out.println("123123");
 			return;
 
+        }
+        */
 
 		String filename = String.format("O2Result_%d_%s_%d.txt", seed, mode, m.length);
 

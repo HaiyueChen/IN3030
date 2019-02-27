@@ -1,0 +1,7 @@
+/**
+ * Parallel
+ */
+public class Parallel {
+    
+    
+}
