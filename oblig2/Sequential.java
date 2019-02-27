@@ -20,7 +20,7 @@ public class Sequential {
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a.length; j++) {
                 for (int k = 0; k < a.length; k++) {
-                    System.out.printf("i: %d  j: %d  k: %d\n", i ,j ,k);
+                    //System.out.printf("i: %d  j: %d  k: %d\n", i ,j ,k);
                     product[i][j] += a[i][k] * b[k][j];
                     
                 }
