@@ -20,7 +20,6 @@ public class Sequential {
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a.length; j++) {
                 for (int k = 0; k < a.length; k++) {
-                    //System.out.printf("i: %d  j: %d  k: %d\n", i ,j ,k);
                     product[i][j] += a[i][k] * b[k][j];
                     
                 }
@@ -32,9 +31,6 @@ public class Sequential {
     public static double[][] multiply_a_transposed(double[][] a, double[][] b){
         double[][] product = new double[a.length][a.length];
         double[][] trans_a = Sequential.transpose(a);
-
-        System.out.println(Arrays.deepToString(trans_a));
-        System.out.println(Arrays.deepToString(b));
 
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a.length; j++) {
