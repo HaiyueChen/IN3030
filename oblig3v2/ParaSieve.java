@@ -19,7 +19,7 @@ public class ParaSieve {
         int root_of_n = (int) Math.sqrt(n) + 1;
         SequentialSieve seqSieve = new SequentialSieve(root_of_n);
         this.initial_primes = seqSieve.findPrimes();
-        System.out.println(Arrays.toString(initial_primes));
+        // System.out.println(Arrays.toString(initial_primes));
         int cells = n / 16 + 1;
         this.byteArray = new byte[cells];
     }
@@ -50,18 +50,20 @@ public class ParaSieve {
         int value_length = n / thread_count;
         Thread[] threads = new Thread[this.thread_count];
         for (int i = 0; i < this.thread_count - 1; i++) {
+            int[] copy = Arrays.copyOf(initial_primes, initial_primes.length);
             threads[i] = new Thread(
                                     new SieveWorker(
-                                        initial_primes, 
+                                        copy, 
                                         this.byteArray,
                                         value_start, 
                                         value_length));
 
             value_start += value_length;
         }
+        int[] copy = Arrays.copyOf(initial_primes, initial_primes.length);
         threads[this.thread_count - 1] = new Thread(
                                                 new SieveWorker(
-                                                initial_primes,
+                                                copy,
                                                 this.byteArray, 
                                                 value_start, 
                                                 n - value_start));

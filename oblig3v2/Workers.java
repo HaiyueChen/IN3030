@@ -1,6 +1,7 @@
 
 class SieveWorker implements Runnable{
     public byte[] byteArray;
+    // public boolean[] array;
     public int[] initial_primes;
     // public int section_start;
     // public int section_length;
@@ -12,6 +13,7 @@ class SieveWorker implements Runnable{
 
     public SieveWorker(int[] initial_primes,
                        byte[] byteArray,
+                    //    boolean[] array,
                        int value_start,
                        int value_length){
         this.id = count ++;
@@ -68,9 +70,6 @@ class SieveWorker implements Runnable{
 
         // System.out.printf("ID: %d , p: %d start: %d\n", this.id, p, start);
         for (int i = start; i <= this.value_end; i += p * 2) {
-            // if(id == 6 && p == 5){
-            //     System.out.printf("ID: %d , flipping: %d p: %d start: %d\n", this.id,i , p, start);
-            // }
             flip(i);
         }
     }
