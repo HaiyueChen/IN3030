@@ -11,10 +11,12 @@ public class ParaSieve {
     public int n;
     public int thread_count;
     public SieveMonitor monitor;
-    public ArrayList<ArrayList<Integer>> result_buckets;
 
     public ParaSieve(int n, int thread_count) {
         this.n = n;
+        if(thread_count > n){
+            this.thread_count = n - 1;    
+        }
         this.thread_count = thread_count;
         this.monitor = new SieveMonitor(this.n);
 
@@ -22,10 +24,10 @@ public class ParaSieve {
     
     private void start() {
         
-        Thread[] threads = new Thread[this.thread_count + 1];
-        int value_start = 3;
-        int value_length = (n - 3) / this.thread_count;
-        int rest = (n - 3) % value_length;
+        Thread[] threads = new Thread[this.thread_count];
+        int value_start = 0;
+        int value_length = n / this.thread_count;
+        
         int work_size = (this.monitor.initial_primes.length / thread_count) + 1;
         int[][] all_the_work = new int[thread_count][work_size];
         int primes_index = 0;
@@ -42,6 +44,7 @@ public class ParaSieve {
                 }
             }
         }
+
         for (int i = 0; i < this.thread_count - 1; i++) {
             int[] work = all_the_work[i];
             threads[i] = new Thread(new SieveWorker(i,
@@ -56,7 +59,7 @@ public class ParaSieve {
         threads[this.thread_count - 1] = new Thread(new SieveWorker(this.thread_count - 1,
                                                                     this.monitor, 
                                                                     value_start, 
-                                                                    value_length + rest,
+                                                                    n - value_start,
                                                                     work
                                                                     ));
 
@@ -86,7 +89,7 @@ class SieveMonitor{
 
     public int currentPrime_index = 1;
     public final Lock lock = new ReentrantLock();
-    public AtomicInteger prime_count = new AtomicInteger(1);
+    public AtomicInteger prime_count = new AtomicInteger(0);
     public final Condition wait_for_all_finish = lock.newCondition();
     
     public int total_threads = 0;
@@ -97,9 +100,11 @@ class SieveMonitor{
         this.n = n;
         int cells = n / 2 + 1;
         this.booArray = new boolean[cells];
+        // System.out.println(booArray.length);
         this.squareRootN = (int) Math.sqrt(n) + 1;
-        SequentialSieve seqSieve = new SequentialSieve(squareRootN);
+        SequentialSieve seqSieve = new SequentialSieve(squareRootN + 1);
         this.initial_primes = seqSieve.findPrimes();
+        // System.out.println(Arrays.toString(initial_primes));
     }
 
     public int fetch_more_work(int id){

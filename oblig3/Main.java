@@ -12,17 +12,18 @@ public class Main {
         // if(writer != null){
         //     //writer.writeFactors();
         // }
+        /*
         long[] para_times = new long[7];
         long[] seq_times = new long[7];
         for (int i = 0; i < 7; i++) {
             // Runtime runtime = Runtime.getRuntime();
             long seq_start = System.nanoTime();
-            SequentialSieve seqs = new SequentialSieve(2000000000);
+            SequentialSieve seqs = new SequentialSieve(200000000);
             int[] seq_primes = seqs.findPrimes();
             long seq_total = System.nanoTime() - seq_start;
             
             long para_start = System.nanoTime();
-            ParaSieve ps = new ParaSieve(2000000000, 8);
+            ParaSieve ps = new ParaSieve(200000000, 8);
             int[] primes = ps.get_primes();
             long para_total = System.nanoTime() - para_start;
             
@@ -36,6 +37,12 @@ public class Main {
         System.out.println("Seq median: " + (double)seq_times[4] / 1000000);
         System.out.println("Para median: " + (double)para_times[4] / 1000000);
         System.out.println("Speed up: " + (((double) seq_times[4] / para_times[4]) - 1));
+        */
+
+        Parallel para = Parallel.init(16, 2);
+        para.factorize();
+
+
     }
 
 }

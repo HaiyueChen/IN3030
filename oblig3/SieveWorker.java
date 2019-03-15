@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class SieveWorker implements Runnable{
     public int id;
     public SieveMonitor m;
@@ -20,6 +22,8 @@ public class SieveWorker implements Runnable{
         this.work = work;
         this.value_start = value_start;
         this.value_end = value_start + value_length;
+        // System.out.printf("ID: %d val_s: %d  val_e: %d  work: \n", id, value_start, value_end);
+        // System.out.println(Arrays.toString(work));
     }
 
     @Override
@@ -37,6 +41,7 @@ public class SieveWorker implements Runnable{
                 this.num_primes ++;
             }
         }
+        // System.out.printf("ID: %d val_s: %d  val_e: %d  found primes: %d", id, value_start, value_end, );
         m.prime_count.getAndAdd(num_primes);
     }
 
