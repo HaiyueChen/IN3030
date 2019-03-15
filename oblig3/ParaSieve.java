@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -9,11 +11,13 @@ public class ParaSieve {
     public int n;
     public int thread_count;
     public SieveMonitor monitor;
+    public ArrayList<ArrayList<Integer>> result_buckets;
 
     public ParaSieve(int n, int thread_count) {
         this.n = n;
         this.thread_count = thread_count;
         this.monitor = new SieveMonitor(this.n);
+
     }
     
     private void start() {
@@ -22,27 +26,43 @@ public class ParaSieve {
         int value_start = 3;
         int value_length = (n - 3) / this.thread_count;
         int rest = (n - 3) % value_length;
+        int work_size = (this.monitor.initial_primes.length / thread_count) + 1;
+        int[][] all_the_work = new int[thread_count][work_size];
+        int primes_index = 0;
+        for (int i = 0; i < work_size; i++) {
+            for (int j = 0; j < thread_count; j++) {
+                if(primes_index == this.monitor.initial_primes.length){
+                    all_the_work[j][i] = 0;
+                }
+                else{
+                    int prime_number = this.monitor.initial_primes[primes_index];
+                    all_the_work[j][i] = prime_number;
+                    primes_index ++;
 
+                }
+            }
+        }
         for (int i = 0; i < this.thread_count - 1; i++) {
-            // System.out.println(String.format("%d %d", value_start, value_length));
-            threads[i] = new Thread(new SieveWorker(
+            int[] work = all_the_work[i];
+            threads[i] = new Thread(new SieveWorker(i,
                                     this.monitor, 
                                     value_start, 
-                                    value_length));
+                                    value_length,
+                                    work
+                                    ));
             value_start += value_length;
         }
-        threads[this.thread_count - 1] = new Thread(new SieveWorker(this.monitor, 
+        int[] work = all_the_work[this.thread_count - 1];
+        threads[this.thread_count - 1] = new Thread(new SieveWorker(this.thread_count - 1,
+                                                                    this.monitor, 
                                                                     value_start, 
-                                                                    value_length + rest + 1));
-        // System.out.println(String.format("%d %d", value_start, value_length + rest));
-        // threads[this.thread_count] = new Thread(new PrimeWorker(this.monitor));
-
-
+                                                                    value_length + rest,
+                                                                    work
+                                                                    ));
 
         for (int i = 0; i < this.thread_count; i++) {
             threads[i].start();
         }
-        System.out.println("Totoal threads: " + monitor.total_threads);
 
         for (int i = 0; i < this.thread_count; i++) {
             try { threads[i].join(); } catch (InterruptedException e) {}
@@ -51,119 +71,71 @@ public class ParaSieve {
 
     public int[] get_primes() {
         this.start();
-        return this.monitor.get_primes();
+        return monitor.get_primes();
     }
 
 }
 
 
 class SieveMonitor{
-    public byte[] byteArray;
+    public boolean[] booArray;
     public int n;
     public int squareRootN;
+    public int[] initial_primes;
 
-    public int currentPrime = 3;
+
+    public int currentPrime_index = 1;
     public final Lock lock = new ReentrantLock();
-    public final Condition get_new_prime = lock.newCondition();
-    public final Condition wait_for_new_prime = lock.newCondition();
+    public AtomicInteger prime_count = new AtomicInteger(1);
+    public final Condition wait_for_all_finish = lock.newCondition();
     
     public int total_threads = 0;
-    public int working_threads = 0;
-    // public AtomicInteger total_threads = new AtomicInteger(0);
-    // public AtomicInteger working_threads = new AtomicInteger(0);
-    // public boolean all_running = true;
-
+    public int num_threads_done_phase_1 = 0;
 
 
     public SieveMonitor(int n){
         this.n = n;
-        int cells = n / 16 + 1;
-        this.byteArray = new byte[cells];
-        this.squareRootN = (int) Math.sqrt(n);
+        int cells = n / 2 + 1;
+        this.booArray = new boolean[cells];
+        this.squareRootN = (int) Math.sqrt(n) + 1;
+        SequentialSieve seqSieve = new SequentialSieve(squareRootN);
+        this.initial_primes = seqSieve.findPrimes();
     }
 
-    public int fetch_current_prime(int last_prime){
+    public int fetch_more_work(int id){
         lock.lock();
-        try {
-            
-            if(last_prime == this.currentPrime){
-                // if(!all_running){
-                //     try {
-                //         // this.working_threads.getAndDecrement();
-                //         wait_for_new_prime.await();
-                //         this.working_threads --;
-                //     } catch (Exception e) {}
-                // }
-                // else{
-                //     this.working_threads --;
-                //     // this.working_threads.getAndDecrement();
-                // }
-                this.working_threads --;
-                // System.out.println(String.format("%d %d", total_threads, working_threads));
-                // if(this.working_threads == 0 && this.all_running){
-                if(this.working_threads == 0){
-                    // this.all_running = false;
-                    // System.out.println("set next prime and signal all");
-                    this.set_next_prime();
-                    wait_for_new_prime.signalAll();
-                }
-                else{
-                    try {
-                        wait_for_new_prime.await();
-                    } catch (InterruptedException e) {}
-                }
-
-                this.working_threads ++;
-                if(this.working_threads != this.total_threads){
-                //     System.out.println(String.format("%d %d", total_threads, working_threads));
-                //     System.out.println("signaling all");
-                //     all_running = true;
-                //     wait_for_new_prime.signalAll();
-                    try {
-                        wait_for_new_prime.await();
-                        
-                    } catch (Exception e) {
-                        //TODO: handle exception
-                    }
-                }
-                else{
-                    wait_for_new_prime.signalAll();
-                }
+        try{
+            if(this.currentPrime_index > this.initial_primes.length - 1){
+                return 0;
             }
-            return this.currentPrime;
+            else{
+                return initial_primes[currentPrime_index++]; 
+            }
         }
         finally{
             lock.unlock();
         }
     }
 
-    public int set_next_prime() {
-        this.currentPrime = findNextPrime(this.currentPrime + 2);
-        // wait_for_new_prime.signalAll();
-        return this.currentPrime;
-
+    public void done_phase_one(){
+        lock.lock();
+        try{
+            this.num_threads_done_phase_1 ++;
+            if(num_threads_done_phase_1 == total_threads){
+                wait_for_all_finish.signalAll();
+            }
+            else{
+                try { wait_for_all_finish.await();} catch (Exception e) {}
+            }
+        }
+        finally{
+            lock.unlock();
+        }
     }
 
-    // public int set_next_prime() {
-    //     lock.lock();
-    //     try{
-    //         // System.out.println(this.working_threads);
-    //         if(this.working_threads != 0){
-    //             // System.out.println("Prime worker waiting");
-    //             try { get_new_prime.await(); } catch (Exception e) {}
-    //         }
-    //         this.currentPrime = findNextPrime(this.currentPrime + 2);
-    //         // System.out.println("Prime worker signingaling all Sieve workers");
-    //         wait_for_new_prime.signalAll();
-    //         return this.currentPrime;
-    //     }
-    //     finally{
-    //         lock.unlock();
-    //     }
-    // }
-
     public int[] get_primes(){
-        int num_primes = this.countPrimes();
+        int num_primes = this.prime_count.get();
+
         int[] primes = new int[num_primes];
         primes[0] = 2;
         int currentPrime = 3;
@@ -174,17 +146,6 @@ class SieveMonitor{
         return primes;
     }
     
-    private int countPrimes() {
-        int num_primes = 1;
-        int start_at = 3;
-        while(start_at != 0){
-            // System.out.println(start_at);
-            num_primes ++;
-            start_at = findNextPrime(start_at + 2);
-        }
-        return num_primes;
-    }
-
 
     private int findNextPrime(int startAt) {
         for (int i = startAt; i < n; i += 2) {
@@ -194,18 +155,14 @@ class SieveMonitor{
         }
         return 0;
     }
-
-    private boolean isPrime(int i) {
-        if((i % 2) == 0) {
+    
+    public boolean isPrime(int i){
+        if((i % 2) == 0){
             return false;
         }
-
-        int byteCell = i / 16;
-        int bit = (i / 2) % 8;
-
-        return (byteArray[byteCell] & (1 << bit)) == 0;
+        int cell = i / 2;
+        return !booArray[cell];
     }
-
 
 }
 

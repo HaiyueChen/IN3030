@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,7 +11,8 @@ public class ParaSieve {
     public int n;
     public int thread_count;
     public byte[] byteArray;
-    public int[] initial_primes;
+    // public int[] initial_primes;
+    public AtomicIntegerArray initial_primes;
 
     public ParaSieve(int n, int thread_count) {
         this.n = n;
@@ -18,7 +20,7 @@ public class ParaSieve {
         
         int root_of_n = (int) Math.sqrt(n) + 1;
         SequentialSieve seqSieve = new SequentialSieve(root_of_n);
-        this.initial_primes = seqSieve.findPrimes();
+        this.initial_primes = new AtomicIntegerArray(seqSieve.findPrimes());
         // System.out.println(Arrays.toString(initial_primes));
         int cells = n / 16 + 1;
         this.byteArray = new byte[cells];
@@ -26,13 +28,18 @@ public class ParaSieve {
     
     public int[] get_primes(){
         this.start();
-        int prime_counter = initial_primes.length - 1;
-        for (int i = initial_primes[initial_primes.length - 1]; i < this.n; i++) {
+        // int prime_counter = initial_primes.length - 1;
+        // for (int i = initial_primes[initial_primes.length - 1]; i < this.n; i++) {
+        //     if(this.isPrime(i)){
+        //         prime_counter ++;
+        //     }
+        // }
+        int prime_counter = 1;
+        for (int i = 3; i < this.n; i++) {
             if(this.isPrime(i)){
                 prime_counter ++;
             }
         }
-
         int[] primes = new int[prime_counter];
         primes[0] = 2;
         int current_prime = 3;
@@ -50,20 +57,20 @@ public class ParaSieve {
         int value_length = n / thread_count;
         Thread[] threads = new Thread[this.thread_count];
         for (int i = 0; i < this.thread_count - 1; i++) {
-            int[] copy = Arrays.copyOf(initial_primes, initial_primes.length);
             threads[i] = new Thread(
                                     new SieveWorker(
-                                        copy, 
+                                        i,
+                                        this.initial_primes, 
                                         this.byteArray,
                                         value_start, 
                                         value_length));
 
             value_start += value_length;
         }
-        int[] copy = Arrays.copyOf(initial_primes, initial_primes.length);
         threads[this.thread_count - 1] = new Thread(
                                                 new SieveWorker(
-                                                copy,
+                                                thread_count - 1,
+                                                this.initial_primes,
                                                 this.byteArray, 
                                                 value_start, 
                                                 n - value_start));
