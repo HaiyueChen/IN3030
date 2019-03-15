@@ -62,7 +62,7 @@ public class Parallel {
                     int prime_number = this.primes[primes_index];
                     all_the_tables[j][i] = prime_number;
                     primes_index ++;
-                }GIT
+                }
             }
         }
         // System.out.println(Arrays.deepToString(all_the_tables));
