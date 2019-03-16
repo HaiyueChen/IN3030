@@ -55,6 +55,40 @@ def main():
                     print("Base: ", base, "Factors {}".format(bits), "\nCorrect: \u001b[32m{}\u001b[0m".format(product == base))
                 print("Line: {}\n".format(line_count))
 
+def check_para_factoring():
+    base = 0
+    line_count = 0
+    for line in sys.stdin:
+        if line == '\n':
+            continue
+        elif "FINISH" in line:
+            continue
+        else:
+            bits = line.split(":")
+            base = int(bits[0])
+            multi_bits = bits[1].split("*")
+            for i in range(len(multi_bits)):
+                multi_bits[i] = int(multi_bits[i])
+
+            print("Base: {}  Factors: {}".format(base, multi_bits))
+
+            for num in multi_bits:
+                if not isPrime(num):
+                    print("{} is prime: \u001b[31m{}\u001b[0m".format(num, isPrime(num)))
+                else:
+                    print("{} is prime: \u001b[32m{}\u001b[0m".format(num, isPrime(num)))
+
+            product = 1
+            line_count += 1
+            for num in multi_bits:
+                product *= num
+            if product != base:
+                print("Correct: \u001b[31m{}\u001b[0m".format(product == base))
+            else:
+                print("Correct: \u001b[32m{}\u001b[0m".format(product == base))
+            
+            print("Line: {}\n".format(line_count))
+
 if __name__ == "__main__":
     # main()
 
@@ -62,4 +96,5 @@ if __name__ == "__main__":
     # for i in numbers:
     #     print(i,  isPrime(i))
 
-    check_list_prime()
+    # check_list_prime()
+    check_para_factoring()
