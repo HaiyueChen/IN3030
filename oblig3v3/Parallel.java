@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -180,11 +181,9 @@ class FactorMonitor {
     private final Lock lock = new ReentrantLock(true);
     private final Condition wait_for_work = lock.newCondition();
     public long[] to_factor; 
-    public AtomicLong current_base;
+    public Long current_base;
     public int factor_index;
-    public long current_to_factor;
-    // public LinkedList<Long> factors_this_iteration;
-    public long product_this_iteration;
+    // public long current_to_factor;
     public TreeMap<Long, LinkedList<Long>> result_bucket;
     public boolean started = false;
     public boolean dead_end = true;
@@ -197,9 +196,7 @@ class FactorMonitor {
         this.to_factor = to_factor;      
         this.factor_index = 0;
         this.result_bucket = result_bucket;
-        this.current_base = new AtomicLong(to_factor[factor_index]);
-        // this.factors_this_iteration = new LinkedList<>();
-        this.product_this_iteration = 1;
+        this.current_base = to_factor[factor_index];
     }
 
     public long get_work(long prev){
@@ -216,7 +213,7 @@ class FactorMonitor {
                     // wait_for_work.await();} catch (Exception e) {}
             // }
             // working_threads ++;
-            return this.current_base.get();
+            return this.current_base;
         }
         finally{
             lock.unlock();
@@ -224,173 +221,61 @@ class FactorMonitor {
 
     }
 
-    public void add_factor(long base, long factor, int id){
-        try {
-            // Thread.sleep(1000);
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
+    public void add_factor(long base, ArrayList<Long> factors, int id){
         lock.lock();
+        try {
+            // Thread.sleep(500);
+        } catch (Exception e) {}
+
         try{
             working_threads --;
-            if(factor == 0){
-                if(working_threads == 0){
-                    working_threads = total_threads;
-                    if(this.dead_end){
-                        this.result_bucket.get(current_to_factor).add(base);
-                        // System.out.println("DEAD END: " + id + "  Base: " + current_base + "  Last base: " + base);    
-                        set_next_task();
+            if(working_threads == 0){
+                // System.out.printf("ID: %d FINISHING\n", id);
+                if (factors.size() > 0) {
+                    for (int i = 0; i < factors.size(); i++) {
+                        this.result_bucket.get(current_base).add(factors.get(i));
                     }
-                    else{
-                        long new_base = current_base.get() / product_this_iteration;
-                        // for (long f : factors_this_iteration) {
-                        //     // System.out.print(f + " ");
-                        //     new_base = new_base / f;
-                        //     this.result_bucket.get(current_to_factor).add(f);
-                        // }
-                        if(new_base == 1){
-                            // System.out.println("SETTING NEW TASK FROM DEAD END");
-                            set_next_task();
-                        }
-                        else{
-                            current_base.set(new_base);
-                        }
-                    }
-                    // factors_this_iteration = new LinkedList<>();
-                    product_this_iteration = 1;
-                    dead_end = true;
-                    // System.out.printf("SIGNALING FROM NOT FOUND id: %d\n", id);
-                    wait_for_work.signalAll();
                 }
-                else{
-                    try {
-                        // System.out.printf("ID: %d DID NOT FIND waiting   work_count: %d\n", id, working_threads);
-                        wait_for_work.await();
-                        // System.out.printf("ID: %d WOKE UP FROM dead end   work_count: %d\n", id, working_threads);
-                    } catch (Exception e) {}
+                long rest = current_base;
+                for (Long factor : this.result_bucket.get(current_base)) {
+                    rest /= factor;
                 }
+                if(rest > 1){
+                    this.result_bucket.get(current_base).add(rest);
+                }
+                set_next_task();
+                working_threads = total_threads;
+                wait_for_work.signalAll();
             }
             else{
-                // System.out.printf("ID: %d ADDING factor: %d  work_count: %d\n", id,factor, working_threads);
-                this.dead_end = false;
-                // factors_this_iteration.add(factor);
-                this.result_bucket.get(current_to_factor).add(factor);
-                product_this_iteration *= factor;
-                if(working_threads == 0){
-                    // long new_base = (long) current_base.get() / factor;
-                    long new_base = current_base.get() / product_this_iteration;
-                    // System.out.print("FACTORS: ");
-                    // for (long f : factors_this_iteration) {
-                    //     // System.out.print(f + " ");
-                    //     new_base = new_base / f;
-                    //     this.result_bucket.get(current_to_factor).add(f);
-                    // }
-                    // System.out.println();
-                    // System.out.println("NEW BASE: " + new_base); 
-                    // this.result_bucket.get(current_to_factor).add(factor);
-                    if(new_base == 1){
-                        // System.out.println("SETTING NEW TASK");
-                        set_next_task();
+                // System.out.printf("ID: %d waiting\n", id);
+                if(factors.size() > 0) {
+                    // this.dead_end = false;
+                    for (int i = 0; i < factors.size(); i++) {
+                        this.result_bucket.get(current_base).add(factors.get(i));
                     }
-                    else{
-                        current_base.set(new_base);
-                    }
-                    working_threads = total_threads;
-                    product_this_iteration = 1;
-                    // factors_this_iteration = new LinkedList<>();
-                    // System.out.println("SIGNALING");
-                    this.dead_end = true;
-                    wait_for_work.signalAll();
                 }
-                else{
-                    // long new_base = (long) current_base.get() / factor; 
-                    // System.out.println("NEW BASE: " + new_base);
-                    // this.result_bucket.get(current_to_factor).add(factor);
-                    // if(new_base == 1){
-                        // set_next_task();
-                    // }
-                    // else{
-                        // current_base.set(new_base);
-                    // }
-                    // factors_this_iteration.add(factor);
-                    try {
-                        // System.out.printf("ID: %d FOUND waiting  work_count: %d\n", id, working_threads);
-                        wait_for_work.await();
-                        // System.out.printf("ID: %d WOKE UP FROM good job   work_count: %d\n", id, working_threads);
-                    } catch (Exception e) {}
-                }
+                try {
+                    wait_for_work.await();
+                } catch (Exception e) {}
             }
-
-
-            // if(base == current_base.get()){
-            //     long new_base = (long) current_base.get() / factor;
-            //     // System.out.printf("ThreadID: %d  Base: %d  Factor: %d  New base: %d\n",id, base, factor, new_base);
-            //     this.result_bucket.get(current_to_factor).add(factor);
-            //     if(new_base == 1){
-            //         // System.out.println("wtf");
-            //         set_next_task();
-            //         // wait_for_work.signalAll();
-            //     }
-            //     else{
-            //         current_base.set(new_base);
-            //         // System.out.println(current_base.get());
-            //         // wait_for_work.signalAll();
-            //     }
-            // }
-            // wait_for_work.signalAll();
         }
         finally{
             lock.unlock();
         }
     }
-
-    // public void no_factor(long base, int id){
-    //     lock.lock();
-    //     try{
-    //         boolean waited = false;
-    //         working_threads --;
-    //         threads_exausted ++;
-    //         // System.out.println("THREADS EXAUSTED: " + threads_exausted + " Id: " + id + "\n");
-    //         if(threads_exausted == total_threads){
-    //             try {
-    //                 this.result_bucket.get(current_to_factor).add(base);
-                    
-    //             } catch (NullPointerException e) {
-    //                 // System.out.printf("CURRENT TO FACTOR: %d  BASE: %d  ID: %d\n", current_to_factor, base, id);
-    //             }
-    //             set_next_task();
-    //             // threads_exausted = 0;
-    //             wait_for_work.signalAll();
-    //         }
-    //         else{
-    //             if(this.factor_index == this.to_factor.length - 1){
-    //                 threads_exausted --;
-    //                 total_threads --;
-    //                 return;
-    //             }
-    //             else{
-    //                 try {   
-    //                     wait_for_work.await();} catch (Exception e) {}
-    //             }
-    //         }
-    //         threads_exausted --;
-    //         working_threads ++;
-    //     }
-    //     finally{
-    //         lock.unlock();
-    //     }
-    // }
 
     private void set_next_task(){
         if(this.factor_index == this.to_factor.length){
-            this.current_base.set(0);
-            this.current_to_factor = 0;
-            this.current_base.set(current_to_factor);
+            this.current_base = (long) 0;
+            // this.current_to_factor = 0;
+            // this.current_base.set(current_to_factor);
             return;
         }
-        this.current_to_factor = this.to_factor[this.factor_index];
+        // this.current_to_factor = this.to_factor[this.factor_index];
+        this.current_base = this.to_factor[this.factor_index];
         this.factor_index ++;
-        this.current_base.set(current_to_factor);
+        // this.current_base.set(current_to_factor);
     }
 
     

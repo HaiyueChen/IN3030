@@ -233,7 +233,7 @@ class FactorMonitor {
                 if(working_threads == 0){
                     working_threads = total_threads;
                     if(this.dead_end){
-                        this.result_beucket.get(current_to_factor).add(current_base.get());
+                        this.result_bucket.get(current_to_factor).add(current_base.get());
                         // System.out.println("DEAD END: " + id + "  Base: " + current_base + "  Last base: " + base);    
                         set_next_task();
                     }

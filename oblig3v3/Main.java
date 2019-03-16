@@ -42,7 +42,7 @@ public class Main {
         double[] seq_times = new double[7];
         for (int i = 0; i < 7; i++) {
             long seq_f_start = System.nanoTime();
-            Sequential seq = Sequential.init(200000000);
+            Sequential seq = Sequential.init(2000000000);
             Oblig3Precode writer_seq = seq.factorize();
             double seq_f_total = (double) (System.nanoTime() - seq_f_start) / 1000000;
             seq_times[i] = seq_f_total;
@@ -54,7 +54,7 @@ public class Main {
         for (int i = 0; i < 7; i++) {
             // System.out.println(i);
             long para_f_start = System.nanoTime();
-            Parallel para = Parallel.init(200000000, 8);
+            Parallel para = Parallel.init(2000000000, 8);
             Oblig3Precode writer_para =  para.factorize();
             double para_f_total = (double) (System.nanoTime() - para_f_start) / 1000000;
             para_times[i] = para_f_total;
