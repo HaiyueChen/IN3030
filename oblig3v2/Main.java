@@ -6,41 +6,63 @@ import java.util.LinkedList;
 public class Main {
 
     public static void main(String[] args) {
-        boolean found_wrong = false;
-        int iterations = 0;
-        while (!found_wrong) {
-            long seq_start_time = System.nanoTime();
-            SequentialSieve seq = new SequentialSieve(100);
-            int[] seq_primes = seq.findPrimes();
-            long seq_total_time = (System.nanoTime() - seq_start_time) / 1000000;
-            // Oblig3Precode writer = seq.factorize_with_print();
-            // if(writer != null){
-            //     //writer.writeFactors();
-            // }
-            long para_start_time = System.nanoTime();
-            ParaSieve ps = new ParaSieve(100, 8);
-            int[] para_primes = ps.get_primes();
-            long para_total_time = (System.nanoTime() - para_start_time) / 1000000;
-            System.out.println("Speed up: " + (double) seq_total_time / para_total_time);
-            System.out.println(String.format("Seq time: %d \nPara time: %d\n ", seq_total_time, para_total_time));
-    
-            // System.out.println(Arrays.equals(para_primes, seq_primes));
-            int para_index = 0;
-            for (int i = 0; i < seq_primes.length; i++) {
-                if(seq_primes[i] != para_primes[para_index]){
-                    System.out.println(String.format("Should be: %d, got: %d",seq_primes[i], para_primes[i]));
-                    found_wrong = true;
-                    para_index ++;
-                }
-                para_index++;
-            }
-            iterations ++;
-            if(found_wrong){
-                System.out.println(Arrays.toString(seq_primes));
-                System.out.println(Arrays.toString(para_primes));
-            }
+               
+        // Sequential seq = Sequential.init(2000000000);
+        // Oblig3Precode writer = seq.factorize_with_print();
+        // if(writer != null){
+        //     //writer.writeFactors();
+        // }
+        /*
+        long[] para_times = new long[7];
+        long[] seq_times = new long[7];
+        for (int i = 0; i < 7; i++) {
+            // Runtime runtime = Runtime.getRuntime();
+            long seq_start = System.nanoTime();
+            SequentialSieve seqs = new SequentialSieve(200000000);
+            int[] seq_primes = seqs.findPrimes();
+            long seq_total = System.nanoTime() - seq_start;
+            
+            long para_start = System.nanoTime();
+            ParaSieve ps = new ParaSieve(200000000, 8);
+            int[] primes = ps.get_primes();
+            long para_total = System.nanoTime() - para_start;
+            
+            // double allocatedMemory = (double)((runtime.totalMemory() - runtime.freeMemory())/ (1024 * 1024));
+            // System.out.println(allocatedMemory);
+            para_times[i] = para_total;
+            seq_times[i] = seq_total;
         }
-        System.out.println(iterations);
+        Arrays.sort(para_times);
+        Arrays.sort(seq_times);
+        System.out.println("Seq median: " + (double)seq_times[4] / 1000000);
+        System.out.println("Para median: " + (double)para_times[4] / 1000000);
+        System.out.println("Speed up: " + (((double) seq_times[4] / para_times[4]) - 1));
+        */
+
+        double[] seq_times = new double[7];
+        for (int i = 0; i < 7; i++) {
+            long seq_f_start = System.nanoTime();
+            Sequential seq = Sequential.init(2000000000);
+            Oblig3Precode writer_seq = seq.factorize();
+            double seq_f_total = (double) (System.nanoTime() - seq_f_start) / 1000000;
+            seq_times[i] = seq_f_total;
+        }
+        Arrays.sort(seq_times);
+        System.out.println(seq_times[4]);
+
+        double[] para_times = new double[7];
+        for (int i = 0; i < 7; i++) {
+            // System.out.println(i);
+            long para_f_start = System.nanoTime();
+            Parallel para = Parallel.init(2000000000, 8);
+            Oblig3Precode writer_para =  para.factorize();
+            double para_f_total = (double) (System.nanoTime() - para_f_start) / 1000000;
+            para_times[i] = para_f_total;
+        }
+        Arrays.sort(para_times);
+        System.out.println((double)para_times[4]);
+
+        System.out.println("Ratio: " + seq_times[4] / para_times[4]);
     }
 
 }
