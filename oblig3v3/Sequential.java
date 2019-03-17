@@ -66,7 +66,7 @@ public class Sequential {
             long base = (long) to_factor[i];
 
             /////////////////////////////
-            System.out.println("Factoring: " +(long) base);
+            System.out.print((long) base + ":");
             /////////////////////////////
 
             long to_do = base;
@@ -75,10 +75,10 @@ public class Sequential {
             int search_from = 0;
             while (to_do > 1) {
                 boolean found = false;
-                if (search_from >= primes.length) {
-                    System.out.println("U fucked up");
-                    return null;
-                }
+                // if (search_from >= primes.length) {
+                //     System.out.println("U fucked up");
+                //     return null;
+                // }
     
                 for (int j = search_from; j < this.primes.length; j++) {
                     if(to_do % this.primes[j] == 0){
@@ -103,11 +103,11 @@ public class Sequential {
             /////////////////////////////
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < factors.size() - 1; j++) {
-                sb.append(String.format("%d x ", factors.get(j)));
+                sb.append(String.format("%d*", factors.get(j)));
 
             }
             sb.append(String.format("%d", factors.get(factors.size() - 1)));
-            System.out.println(sb.toString() + "\n");   
+            System.out.println(sb.toString());   
             /////////////////////////////
         }
         return this.writer;

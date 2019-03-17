@@ -1,8 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 from math import sqrt
 from itertools import count, islice
+
+
+correct_color = ""
+wrong_color = ""
+color_end = ""
+
+if sys.platform == "linux":
+    correct_color = "\u001b[32m"
+    wrong_color = "\u001b[31m"
+    color_end = "\u001b[0m"
+
 
 
 def isPrime(n):
@@ -18,51 +29,20 @@ def check_list_prime():
             bits[i] = int(bits[i])
         for num in bits:
             if (isPrime(num)):
-                print("{} is prime: \u001b[32m{}\u001b[0m".format(num, True))
+                print("{} is prime: {}{}{}".format(num, correct_color, True, color_end))
             else:
-                print("{} is prime: \u001b[31m{}\u001b[0m".format(num, False))
-
+                print("{} is prime: {}{}{}".format(num, wrong_color, False, color_end))
 
 def main():
     base = 0
     line_count = 0
     for line in sys.stdin:
-        if line == "\n":
-            continue
-        else:
-            if "Factoring" in line:
-                bits = line.split(":")
-                base = int(bits[1])
-            else:
-                bits = line.split(" x ")
-                for i in range(len(bits)):
-                    bits[i] = int(bits[i])
-                print("Base: ", base, "Factors {}".format(bits))
-                
-                for num in bits:
-                    if not isPrime(num):
-                        print("{} is prime: \u001b[31m{}\u001b[0m".format(num, isPrime(num)))
-                    else:
-                        print("{} is prime: \u001b[32m{}\u001b[0m".format(num, isPrime(num)))
-
-                product = 1
-                line_count += 1
-                for num in bits:
-                    product *= num
-                if product != base:
-                    print("Base: ", base, "Factors {}".format(bits), "\nCorrect: \u001b[31m{}\u001b[0m".format(product == base))
-                else:
-                    print("Base: ", base, "Factors {}".format(bits), "\nCorrect: \u001b[32m{}\u001b[0m".format(product == base))
-                print("Line: {}\n".format(line_count))
-
-def check_para_factoring():
-    base = 0
-    line_count = 0
-    for line in sys.stdin:
         if line == '\n':
             continue
-        elif "FINISH" in line:
+        elif "FINISH" in line or "Number" in line or "Default" in line:
             continue
+        elif "correct" in line or "java" in line:
+            print(line, end="")
         else:
             bits = line.split(":")
             base = int(bits[0])
@@ -73,28 +53,21 @@ def check_para_factoring():
             print("Base: {}  Factors: {}".format(base, multi_bits))
 
             for num in multi_bits:
-                if not isPrime(num):
-                    print("{} is prime: \u001b[31m{}\u001b[0m".format(num, isPrime(num)))
+                if isPrime(num):
+                    print("{} is prime: {}{}{}".format(num, correct_color, True, color_end))
                 else:
-                    print("{} is prime: \u001b[32m{}\u001b[0m".format(num, isPrime(num)))
+                    print("{} is prime: {}{}{}".format(num, wrong_color, False, color_end))
 
             product = 1
             line_count += 1
             for num in multi_bits:
                 product *= num
-            if product != base:
-                print("Correct: \u001b[31m{}\u001b[0m".format(product == base))
+            if product == base:
+                print("Correct: {}{}{}".format(correct_color, product == base, color_end))
             else:
-                print("Correct: \u001b[32m{}\u001b[0m".format(product == base))
+                print("Correct: {}{}{}".format(wrong_color, product == base, color_end))
             
             print("Line: {}\n".format(line_count))
 
 if __name__ == "__main__":
-    # main()
-
-    # numbers = [0, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
-    # for i in numbers:
-    #     print(i,  isPrime(i))
-
-    # check_list_prime()
-    check_para_factoring()
+    main()
