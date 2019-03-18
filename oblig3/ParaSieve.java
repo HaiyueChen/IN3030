@@ -107,20 +107,20 @@ class SieveMonitor{
         // System.out.println(Arrays.toString(initial_primes));
     }
 
-    public int fetch_more_work(int id){
-        lock.lock();
-        try{
-            if(this.currentPrime_index > this.initial_primes.length - 1){
-                return 0;
-            }
-            else{
-                return initial_primes[currentPrime_index++]; 
-            }
-        }
-        finally{
-            lock.unlock();
-        }
-    }
+    // public int fetch_more_work(int id){
+    //     lock.lock();
+    //     try{
+    //         if(this.currentPrime_index > this.initial_primes.length - 1){
+    //             return 0;
+    //         }
+    //         else{
+    //             return initial_primes[currentPrime_index++]; 
+    //         }
+    //     }
+    //     finally{
+    //         lock.unlock();
+    //     }
+    // }
 
     public void done_phase_one(){
         lock.lock();

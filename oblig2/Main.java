@@ -7,7 +7,24 @@ public class Main {
 
     public static void main(String[] args) {
         // show_correct();
-        int seed = 10;
+        if(args.length < 2){
+            System.out.println("Correct way to run this program:");
+            System.out.println("\tjava Main {seed} {n}(optional) test(optional)");
+            System.exit(0);
+        }
+        
+        int seed = Integer.valueOf(args[0]);
+        int n = Integer.valueOf(args[1]);
+        if(args.length == 3){
+            if(args[2].equals("test")){
+                show_correct(seed, n);
+
+            }
+            else{
+                System.out.println("Did not recognize token: " + args[2]);
+            }
+            System.exit(0);
+        }
         int[] sizes = new int[] { 100, 200, 500, 1000 };
 
         long[][] seq_normal_times = new long[sizes.length][7];
@@ -135,10 +152,10 @@ public class Main {
 
     }
 
-    public static void show_correct() {
+    public static void show_correct(int seed, int n) {
         // Generates two matrixes with the precode
-        double[][] a = Oblig2Precode.generateMatrixA(100, 100);
-        double[][] b = Oblig2Precode.generateMatrixB(100, 100);
+        double[][] a = Oblig2Precode.generateMatrixA(seed, n);
+        double[][] b = Oblig2Precode.generateMatrixB(seed, n);
 
         // Use result from normal sequential algorithm as expected value
         double[][] result_sequential_normal = Sequential.multiply_normal(a, b);
@@ -163,6 +180,18 @@ public class Main {
                 "Parallel a transposed correct: " + Arrays.deepEquals(result_sequential_normal, result_para_a_trans));
         System.out.println(
                 "Parallel b transposed correct: " + Arrays.deepEquals(result_sequential_normal, result_para_b_trans));
+
+        System.out.println("-------- Saving results --------");
+
+        Oblig2Precode.saveResult(seed, Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED, result_sequential_normal);
+        Oblig2Precode.saveResult(seed, Oblig2Precode.Mode.SEQ_A_TRANSPOSED, result_sequential_a_trans);
+        Oblig2Precode.saveResult(seed, Oblig2Precode.Mode.SEQ_B_TRANSPOSED, result_sequential_b_trans);
+
+        Oblig2Precode.saveResult(seed, Oblig2Precode.Mode.PARA_NOT_TRANSPOSED, result_para_normal);
+        Oblig2Precode.saveResult(seed, Oblig2Precode.Mode.PARA_A_TRANSPOSED, result_para_a_trans);
+        Oblig2Precode.saveResult(seed, Oblig2Precode.Mode.PARA_B_TRANSPOSED, result_para_b_trans);
+        
+        System.out.println("------------- DONE -------------");
     }
 
     public static long get_median(long[] array){

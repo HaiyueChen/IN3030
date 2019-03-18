@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -33,26 +34,28 @@ public class FactorWorker implements Runnable {
                 // System.out.println("FINISHED");
                 break;
             }
-            boolean found_factor = false;
-            for (int i = 0; i < primes_to_check.length; i++) {
-                int prime = primes_to_check[i];
-
-                if(prime == 0){
-                    break;
+            ArrayList<Long> factors = new ArrayList<>();
+            long to_do = work;
+            int search_from = 0;
+            while (to_do > 1) {
+                boolean found = false;
+                for (int j = search_from; j < this.primes_to_check.length; j++) {
+                    if(this.primes_to_check[j] == 0){
+                        break;
+                    }
+                    if(to_do % this.primes_to_check[j] == 0){
+                        found = true;
+                        to_do /= this.primes_to_check[j];
+                        factors.add((long) this.primes_to_check[j]);
+                        search_from = j;
+                        break;
+                    }
                 }
-                if(work % prime == 0){
-                    // System.out.printf("ID: %d  work: %d FOUND FACTOR: %d\n", this.id, work, prime);
-                    m.add_factor(work, prime, id);
-                    found_factor = true;
-                    break;
+                if(!found){
+                    to_do = 1;
                 }
             }
-            old_task = work;
-            if(!found_factor){
-                // System.out.printf("ID: %d DID NOT FIND FACTOR: %d \n", id, old_task);
-                // m.no_factor(old_task, id);
-                m.add_factor(old_task, 0, id);
-            }
+            m.add_factor(work, factors, id);
         }
         // m.working_threads --;
         // System.out.printf("FINISH id: %d\n", id);
