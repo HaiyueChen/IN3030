@@ -9,15 +9,10 @@ public class Main {
     public static void main(String[] args) {
         
         int[] org = Oblig4Precode.generateArray(100000, 10);
-        int[] a1 = Arrays.copyOf(org, org.length);
-        int[] a2 = Arrays.copyOf(a1, a1.length);
-
-        int[] res = Sequential.sort(a2, 15);
-        Arrays.sort(a1);
-        System.out.println(Arrays.toString(a1));
-        System.out.println(Arrays.toString(res));
-        System.out.println(Arrays.equals(a1, res));
-
+        // int[] a1 = Arrays.copyOf(org, org.length);
+        // int[] a2 = Arrays.copyOf(a1, a1.length);
+        Parallel.sort(org, 8, 8);
+        findMax(org);
 
 
 
@@ -39,6 +34,18 @@ public class Main {
             System.out.println(Arrays.toString(pairs));
         }
     }
+
+    public static void findMax(int[] a){
+        int max = 0;
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] > max) {
+                max = a[i];
+            }
+        }
+        System.out.println(max);
+    }
+
+
 
 
 
