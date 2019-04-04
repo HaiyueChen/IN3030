@@ -12,7 +12,8 @@ public class Parallel {
         if (a.length < numThreads)
             numThreads = a.length;
 
-        CyclicBarrier barr = new CyclicBarrier(numThreads + 1);
+        CyclicBarrier main_barr = new CyclicBarrier(numThreads + 1);
+        CyclicBarrier thread_barr = new CyclicBarrier(numThreads);
         Thread[] threads = new Thread[numThreads];
         Worker[] workers = new Worker[numThreads];
 
@@ -20,18 +21,20 @@ public class Parallel {
         int segment_length = a.length / numThreads;
         int rest = a.length % numThreads;
         int[] result_bucket = new int[numThreads];
+        
+        
         for (int i = 0; i < numThreads - 1; i++) {
-            workers[i] = new Worker(i, a, segment_start, segment_length, barr, result_bucket);
+            workers[i] = new Worker(i, a, b, segment_start, segment_length, main_barr, thread_barr, result_bucket);
             threads[i] = new Thread(workers[i]);
             segment_start += segment_length;
         }
-        workers[numThreads - 1] = new Worker(numThreads - 1, a, segment_start, segment_length + rest, barr, result_bucket); 
+        workers[numThreads - 1] = new Worker(numThreads - 1, a, b, segment_start, segment_length + rest, main_barr, thread_barr, result_bucket); 
         threads[numThreads - 1] = new Thread(workers[numThreads - 1]);
 
         for (int i = 0; i < numThreads; i++) {
             threads[i].start();
         }
-        try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
+        try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
         
         
         
@@ -52,7 +55,7 @@ public class Parallel {
         }
         bits[bits.length - 1] = bitsPerDigit + rest;
 
-
+        // for (Worker w : workers) {}
         int shift = 0;
         int[] temp;
         for (int i = 0; i < bits.length; i++) {
@@ -62,17 +65,23 @@ public class Parallel {
                 w.set_count(numDigits);
                 w.set_all_Count(all_count);
                 w.set_sum_count(sum_count);
-                w.set_mask_len(bit[i]);
+                w.set_mask_len(bits[i]);
                 w.set_shift(shift);
             }
-            try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
-            try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
-            try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
-            
+            //wait for threads to compute count-array
+            try {   main_barr.await();  } catch (Exception e) {}
+            //compute index table
+            int sum = 0;
+            int[] digitPointers = new int[sum_count.length];
+            for (int j = 0; i < sum_count.length; i++) {
+                digitPointers[i] = sum;
+                sum += sum_count[i];
+            }
+
             shift += bits[i];
-            temp = a;
-            a = b;
-            b = temp;
+            for (Worker w : workers) {
+                w.swap_ab();
+            }
         }
         for (Worker w : workers) {
             w.set_mask_len(-1);

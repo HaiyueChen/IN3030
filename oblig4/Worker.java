@@ -8,48 +8,68 @@ public class Worker implements Runnable {
 
     public int id;
     public int[] a;
+    public int[] b;
     public int segment_start;
     public int segment_length;
     public int[] result_bucket;
-    public CyclicBarrier barr;
+    public CyclicBarrier main_barr;
+    public CyclicBarrier thread_barr;
     public int[] count;
     public int[][] all_count;
     public int[] sum_count;
     public int mask_len;
     public int shift;
+    public int sum_column_start;
+    public int sum_column_length;
 
-    public Worker(int id, int[] a, int segment_start, int segment_length, CyclicBarrier barr, int[] result_bucket) {
+    public Worker(int id, int[] a, int[] b, int segment_start, int segment_length, CyclicBarrier main_barr, CyclicBarrier thread_barr, int[] result_bucket) {
         this.id = id;
         this.a = a;
+        this.b = b;
         this.segment_start = segment_start;
         this.segment_length = segment_length;
-        this.barr = barr;
+        this.main_barr = main_barr;
+        this.thread_barr = thread_barr;
         this.result_bucket = result_bucket;
     }
 
     @Override
     public void run() {
+
+        //Find max
         int max = 0;
         for (int i = segment_start; i < segment_start + segment_length; i++) {
             if (a[i] > max)
                 max = a[i];
         }
         this.result_bucket[id] = max;
-        try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
-        try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
+        //Done find max
+        try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
+        //wait for main-thread
+        try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
+        
         while (true) {
             if (mask_len == -1) {
                 break;
             }
+            //start counting
             int mask = (1 << mask_len) - 1;
             for (int i = segment_start; i < segment_start + segment_length; i++) {
                 this.count[(a[i] >>> shift) & mask] ++;
             }
             this.all_count[this.id] = this.count;
-            try {   barr.await();   } catch (Exception e) {e.printStackTrace();}
+            //wait for other threads to finish counting
+            try {   thread_barr.await();   } catch (Exception e) {e.printStackTrace();}
+            //summing count for all values of the digit
             for (int i = 0; i < all_count.length; i++) {
-                sum_count[this.id] += all_count[this.id]
+                for (int j = sum_column_start; j < sum_column_start + sum_column_length; j++) {
+                    sum_count[j] += all_count[i][j];
+                }
             }
+            //wait for other threads to finish summing
+            try {   thread_barr.await();   } catch (Exception e) {e.printStackTrace();}
+
+
         }
     }
 
@@ -71,6 +91,12 @@ public class Worker implements Runnable {
 
     public void set_shift(int shift){
         this.shift = shift;
+    }
+
+    public void swap_ab(){
+        int[] temp = a;
+        a = b;
+        b = temp;
     }
 
 }
