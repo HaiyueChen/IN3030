@@ -18,28 +18,28 @@ public class Main {
         //     System.out.println(Arrays.equals(seq_res, para_res));
         //     System.gc();
         // }
-        double[] para_times = new double[7];
-        double[] seq_times = new double[7];
+        double[] para_times = new double[13];
+        double[] seq_times = new double[13];
         
-        int[] org = Oblig4Precode.generateArray(100000000, 10);
+        int[] org = Oblig4Precode.generateArray(100000000, 25);
         System.out.println("Seq start");
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 13; i++) {
             long seq_time_start = System.nanoTime();
-            int[] seq_res = Sequential.sort(org, 12);
+            int[] seq_res = Sequential.sort(org, 8);
             seq_times[i] = (double) (System.nanoTime() - seq_time_start) / 1000000;
             System.gc();
         }
         System.out.println("para start");
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 13; i++) {
             long para_time_start = System.nanoTime();
-            int[] para_res = Parallel.sort(org, 12, 4);
+            int[] para_res = Parallel.sort(org, 8, 8);
             para_times[i] = (double) (System.nanoTime() - para_time_start) / 1000000;   
             System.gc();
         }
 
         Arrays.sort(para_times);
         Arrays.sort(seq_times);
-        System.out.println(seq_times[4] / para_times[4]);
+        System.out.println(seq_times[7] / para_times[7]);
 
 
     }

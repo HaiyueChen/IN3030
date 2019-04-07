@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Parallel
@@ -92,22 +93,17 @@ public class Parallel {
             // compute index table
             // System.out.println("Sum count: " + Arrays.toString(sum_count));
             int sum = 0;
-            int[] digitPointers = new int[sum_count.length];
+            // int[] digitPointers = new int[sum_count.length];
+            AtomicIntegerArray digitPointers = new AtomicIntegerArray(sum_count.length);
             for (int j = 0; j < sum_count.length; j++) {
-                digitPointers[j] = sum;
+                digitPointers.getAndAdd(j, sum);
                 sum += sum_count[j];
             }
             // System.out.println("Index table: " + Arrays.toString(digitPointers));
             // TODO assign threads to move the ints
-            int table_start = 0;
-            int table_segment_length = digitPointers.length - numThreads;
-            int table_segment_rest = digitPointers.length % numThreads;
-            for (int j = 0; j < workers.length - 1; j++) {
-                workers[j].set_table_params(digitPointers, table_start, table_start + table_segment_length);
-                table_start += table_segment_length;
+            for (int j = 0; j < workers.length; j++) {
+                workers[j].set_table_params(digitPointers);
             }
-            workers[numThreads - 1].set_table_params(digitPointers, table_start,
-                    table_start + table_segment_length + table_segment_rest);
 
 
             // Finished assigning threads segments

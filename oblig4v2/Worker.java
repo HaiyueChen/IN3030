@@ -1,5 +1,6 @@
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.Arrays;
 
 /**
@@ -22,9 +23,9 @@ public class Worker implements Runnable {
     public int shift;
     public int sum_column_start;
     public int sum_column_length;
-    public int[] table;
-    public int table_start;
-    public int table_end;
+    public AtomicIntegerArray table;
+    // public int table_start;
+    // public int table_end;
 
     public Worker(int id, int[] a, int[] b, int segment_start, int segment_length, CyclicBarrier main_barr, CyclicBarrier thread_barr, int[] result_bucket) {
         this.id = id;
@@ -85,13 +86,10 @@ public class Worker implements Runnable {
             
             //swap data between a and b
             // System.out.println("Table: " + Arrays.toString(table));
-            for (int i = 0; i < a.length; i++) {
+            for (int i = segment_start; i < segment_start + segment_length; i++) {
                 int pointer_position = (a[i] >>> shift) & mask;
-                if (pointer_position >= table_start && pointer_position < table_end) {
-                    int new_index = table[pointer_position]; 
-                    b[new_index] = a[i];
-                    table[pointer_position] ++;
-                }
+                int new_index = table.getAndIncrement(pointer_position); 
+                b[new_index] = a[i];
             }
             swap_ab();
             // System.out.println("Thread: " + id + "\nA: " + Arrays.toString(a) + "\nB: " + Arrays.toString(b));
@@ -102,10 +100,10 @@ public class Worker implements Runnable {
         // System.out.printf("Thread %d finished\n", id);
     }
 
-    public void set_table_params(int[] table, int start, int end){
+    public void set_table_params(AtomicIntegerArray table){
         this.table = table;
-        this.table_start = start;
-        this.table_end = end;
+        // this.table_start = start;
+        // this.table_end = end;
     }
 
     public void set_count(int size){
