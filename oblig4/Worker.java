@@ -1,5 +1,6 @@
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.Arrays;
 
 /**
  * Worker
@@ -54,10 +55,15 @@ public class Worker implements Runnable {
             }
             //start counting
             int mask = (1 << mask_len) - 1;
+            // System.out.printf("Segemnt start: %d  end: %d\n", segment_start, segment_start + segment_length);
             for (int i = segment_start; i < segment_start + segment_length; i++) {
-                this.count[(a[i] >>> shift) & mask] ++;
+                int index = (a[i] >>> shift) & mask;
+                //System.out.println(index);
+                //System.out.println(Arrays.toString(this.count));
+                this.count[index] ++;
             }
             this.all_count[this.id] = this.count;
+            // System.out.println(Arrays.deepToString(this.all_count));
             //wait for other threads to finish counting
             try {   thread_barr.await();   } catch (Exception e) {e.printStackTrace();}
             //summing count for all values of the digit
@@ -66,6 +72,7 @@ public class Worker implements Runnable {
                     sum_count[j] += all_count[i][j];
                 }
             }
+            System.out.println("sum count from thread " + Arrays.toString(sum_count));
             //wait for other threads to finish summing
             try {   thread_barr.await();   } catch (Exception e) {e.printStackTrace();}
 
@@ -77,7 +84,7 @@ public class Worker implements Runnable {
         this.count = new int[size]; 
     }
 
-    public void set_all_Count(int[][] all_count){
+    public void set_all_count(int[][] all_count){
         this.all_count = all_count;
     }
 

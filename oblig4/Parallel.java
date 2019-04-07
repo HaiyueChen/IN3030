@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
@@ -42,10 +43,12 @@ public class Parallel {
         for (int i = 0; i < result_bucket.length; i++) 
             if (result_bucket[i] > max) max = result_bucket[i]; 
         
-
+        System.out.println("Max: " + max);
         int numBits = 0;
         while(max > 1L << numBits) numBits ++;
         int numDigits = Math.max(1, numBits/useBits);
+        System.out.println("Num bits: " + numBits);
+        System.out.println("Num digits: " + numDigits);
 
         int[] bits = new int[numDigits];
         int bitsPerDigit = numBits/numDigits;
@@ -53,17 +56,17 @@ public class Parallel {
         for (int i = 0; i < bits.length - 1; i++) {
             bits[i] = bitsPerDigit;
         }
-        bits[bits.length - 1] = bitsPerDigit + rest;
-
+        bits[bits.length - 1] = bitsPerDigit + bit_rest;
+        // System.out.println(Arrays.toString(bits));
         // for (Worker w : workers) {}
         int shift = 0;
         int[] temp;
         for (int i = 0; i < bits.length; i++) {
-            int[][] all_count = new int[numThreads][];
-            int[] sum_count = new int[numDigits];
+            int[][] all_count = new int[numThreads][(1 << bits[i])];
+            int[] sum_count = new int[(1 << bits[i])];
             for (Worker w : workers) {
-                w.set_count(numDigits);
-                w.set_all_Count(all_count);
+                w.set_count((1 << bits[i]));
+                w.set_all_count(all_count);
                 w.set_sum_count(sum_count);
                 w.set_mask_len(bits[i]);
                 w.set_shift(shift);
@@ -73,10 +76,13 @@ public class Parallel {
             //compute index table
             int sum = 0;
             int[] digitPointers = new int[sum_count.length];
-            for (int j = 0; i < sum_count.length; i++) {
-                digitPointers[i] = sum;
-                sum += sum_count[i];
+            for (int j = 0; j < sum_count.length; j++) {
+                digitPointers[j] = sum;
+                sum += sum_count[j];
             }
+
+            System.out.println("All count: " + Arrays.deepToString(all_count));
+            System.out.println("Index table: " + Arrays.toString(digitPointers));
 
             shift += bits[i];
             for (Worker w : workers) {

@@ -8,11 +8,16 @@ public class Main {
 
     public static void main(String[] args) {
         
-        int[] org = Oblig4Precode.generateArray(100000, 10);
+        int[] org = Oblig4Precode.generateArray(10, 10);
         // int[] a1 = Arrays.copyOf(org, org.length);
         // int[] a2 = Arrays.copyOf(a1, a1.length);
-        Parallel.sort(org, 8, 8);
-        findMax(org);
+        
+        int[] test = new int[10];
+        for (int i = 10; i > 0; i--) {
+            test[10 - i] = i;
+        }
+        System.out.println(Arrays.toString(test));
+        System.out.println(Arrays.toString(Parallel.sort(test, 8, 1)));
 
 
 
