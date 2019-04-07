@@ -22,23 +22,25 @@ public class Parallel {
         int segment_length = a.length / numThreads;
         int rest = a.length % numThreads;
         int[] result_bucket = new int[numThreads];
-        
-        
+
         for (int i = 0; i < numThreads - 1; i++) {
             workers[i] = new Worker(i, a, b, segment_start, segment_length, main_barr, thread_barr, result_bucket);
             threads[i] = new Thread(workers[i]);
             segment_start += segment_length;
         }
-        workers[numThreads - 1] = new Worker(numThreads - 1, a, b, segment_start, segment_length + rest, main_barr, thread_barr, result_bucket); 
+        workers[numThreads - 1] = new Worker(numThreads - 1, a, b, segment_start, segment_length + rest, main_barr,
+                thread_barr, result_bucket);
         threads[numThreads - 1] = new Thread(workers[numThreads - 1]);
 
         for (int i = 0; i < numThreads; i++) {
             threads[i].start();
         }
-        try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
-        
-        
-        
+        try {
+            main_barr.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         int max = 0;
         for (int i = 0; i < result_bucket.length; i++) 
             if (result_bucket[i] > max) max = result_bucket[i]; 
@@ -51,7 +53,7 @@ public class Parallel {
         System.out.println("Num digits: " + numDigits);
 
         int[] bits = new int[numDigits];
-        int bitsPerDigit = numBits/numDigits;
+        int bitsPerDigit = numBits / numDigits;
         int bit_rest = numBits % numDigits;
         for (int i = 0; i < bits.length - 1; i++) {
             bits[i] = bitsPerDigit;
@@ -71,19 +73,31 @@ public class Parallel {
                 w.set_mask_len(bits[i]);
                 w.set_shift(shift);
             }
-            //wait for threads to compute count-array
+            // wait for threads to compute count-array
             try {   main_barr.await();  } catch (Exception e) {}
-            //compute index table
+            // compute index table
             int sum = 0;
             int[] digitPointers = new int[sum_count.length];
             for (int j = 0; j < sum_count.length; j++) {
                 digitPointers[j] = sum;
                 sum += sum_count[j];
             }
+            // TODO assign threads to move the ints
+            int table_start = 0;
+            int table_segment_length = digitPointers.length - numThreads;
+            int table_segment_rest = digitPointers.length % numThreads;
+            for (int j = 0; j < workers.length - 1; j++) {
+                workers[j].set_table_params(digitPointers, table_start, table_start + table_segment_length);
+                table_start += table_segment_length;
+            }
+            workers[numThreads - 1].set_table_params(digitPointers, table_start,
+                    table_start + table_segment_length + table_segment_rest);
 
             System.out.println("All count: " + Arrays.deepToString(all_count));
             System.out.println("Index table: " + Arrays.toString(digitPointers));
 
+            // Finished assigning threads segments
+            try {   main_barr.await();  } catch (Exception e) {}
             shift += bits[i];
             for (Worker w : workers) {
                 w.swap_ab();
