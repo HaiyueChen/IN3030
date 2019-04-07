@@ -11,8 +11,8 @@ public class Main {
         int[] org = Oblig4Precode.generateArray(100000, 10);
         // int[] a1 = Arrays.copyOf(org, org.length);
         // int[] a2 = Arrays.copyOf(a1, a1.length);
-        Parallel.sort(org, 8, 8);
-        findMax(org);
+        int[] sort = Parallel.sort(org, 800, 8);
+        System.out.println(Arrays.toString(sort));
 
 
 

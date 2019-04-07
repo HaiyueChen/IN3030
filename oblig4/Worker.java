@@ -21,6 +21,9 @@ public class Worker implements Runnable {
     public int shift;
     public int sum_column_start;
     public int sum_column_length;
+    public int[] table;
+    public int table_start;
+    public int table_end;
 
     public Worker(int id, int[] a, int[] b, int segment_start, int segment_length, CyclicBarrier main_barr, CyclicBarrier thread_barr, int[] result_bucket) {
         this.id = id;
@@ -67,10 +70,28 @@ public class Worker implements Runnable {
                 }
             }
             //wait for other threads to finish summing
-            try {   thread_barr.await();   } catch (Exception e) {e.printStackTrace();}
-
-
+            try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
+            //wait for main thread to compute index table
+            try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
+            
+            //swap data between a and b
+            for (int i = 0; i < a.length; i++) {
+                int pointer_position = (a[i] >>> shift) & mask;
+                if (pointer_position >= table_start && pointer_position <= table_end) {
+                    b[table[pointer_position]] = a[i];
+                    table[pointer_position] ++;
+                }
+            }
+            //wait for other threads to finish swap
+            try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
+            try {   main_barr.await();   } catch (Exception e) {e.printStackTrace();}
         }
+    }
+
+    public void set_table_params(int[] table, int start, int end){
+        this.table = table;
+        this.table_start = start;
+        this.table_end = end;
     }
 
     public void set_count(int size){
