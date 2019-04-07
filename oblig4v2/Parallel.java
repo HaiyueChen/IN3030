@@ -1,7 +1,4 @@
-import java.util.Arrays;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Parallel
@@ -15,7 +12,6 @@ public class Parallel {
             numThreads = a.length;
 
         CyclicBarrier main_barr = new CyclicBarrier(numThreads + 1);
-        CyclicBarrier thread_barr = new CyclicBarrier(numThreads);
         Thread[] threads = new Thread[numThreads];
         Worker[] workers = new Worker[numThreads];
 
@@ -25,30 +21,25 @@ public class Parallel {
         int[] result_bucket = new int[numThreads];
 
         for (int i = 0; i < numThreads - 1; i++) {
-            workers[i] = new Worker(i, a, b, segment_start, segment_length, main_barr, thread_barr, result_bucket);
+            workers[i] = new Worker(i, a, b, segment_start, segment_length, main_barr, result_bucket);
             threads[i] = new Thread(workers[i]);
             segment_start += segment_length;
         }
-        workers[numThreads - 1] = new Worker(numThreads - 1, a, b, segment_start, segment_length + rest, main_barr,
-                thread_barr, result_bucket);
+        workers[numThreads - 1] = new Worker(numThreads - 1, a, b, segment_start, segment_length + rest, main_barr, result_bucket);
         threads[numThreads - 1] = new Thread(workers[numThreads - 1]);
 
         for (int i = 0; i < numThreads; i++) {
             threads[i].start();
         }
-        // System.out.println("main thread hit bar 1");
         try {   main_barr.await();  } catch (Exception e) {e.printStackTrace();}
 
         int max = 0;
         for (int i = 0; i < result_bucket.length; i++) 
             if (result_bucket[i] > max) max = result_bucket[i]; 
         
-        // System.out.println("Max: " + max);
         int numBits = 0;
         while(max > 1L << numBits) numBits ++;
         int numDigits = Math.max(1, numBits/useBits);
-        // System.out.println("Num bits: " + numBits);
-        // System.out.println("Num digits: " + numDigits);
 
         int[] bits = new int[numDigits];
         int bitsPerDigit = numBits / numDigits;
@@ -57,7 +48,6 @@ public class Parallel {
             bits[i] = bitsPerDigit;
         }
         bits[bits.length - 1] = bitsPerDigit + bit_rest;
-        // System.out.println(Arrays.toString(bits));
 
         int shift = 0;
         int[] temp;
@@ -85,47 +75,33 @@ public class Parallel {
             workers[workers.length - 1].set_shift(shift);
             workers[workers.length - 1].sum_column_start = sum_column_start;
             workers[workers.length - 1].sum_column_length = sum_column_length + sum_column_rest;
-            // for (Worker w : workers) {
-                // System.out.println(w.mask_len);
-            // }
 
             // wait for threads to compute count-array
-            // System.out.println("main thread hit bar 2");s
             try {   main_barr.await();  } catch (Exception e) {}
             try {   main_barr.await();  } catch (Exception e) {}
             // compute index table
-            // System.out.println("Sum count: " + Arrays.toString(sum_count));
             int sum = 0;
-            // int[] digitPointers = new int[sum_count.length];
-            AtomicIntegerArray digitPointers = new AtomicIntegerArray(sum_count.length);
-            for (int j = 0; j < sum_count.length; j++) {
-                digitPointers.getAndAdd(j, sum);
-                sum += sum_count[j];
+            int[][] digitPointers = new int[all_count.length][all_count[0].length];
+            for (int k = 0; k < all_count[0].length; k++) {
+                for (int j = 0; j < all_count.length; j++) {
+                    digitPointers[j][k] = sum;
+                    sum += all_count[j][k];
+                }
             }
-            System.out.println("Index table: " + digitPointers.toString());
-            for (int j = 0; j < workers.length; j++) {
-                workers[j].set_table_params(digitPointers);
+            for (int j = 0; j < digitPointers.length; j++) {
+                workers[j].count = digitPointers[j];
             }
-
 
             // Finished assigning threads segments
-            // System.out.println("main thread hit bar 3");
             try {   main_barr.await();  } catch (Exception e) {}
             try {   main_barr.await();  } catch (Exception e) {}
-            // System.out.println("main thread hit bar 4");
-
             shift += bits[i];
             temp = a;
             a = b;
             b = temp;
-            // for (Worker w : workers) {
-            //     w.swap_ab();
-            // }
         }
         for (Worker w : workers) {
             w.set_mask_len(-1);
-            // System.out.println("Setting finish flag");
-            // System.out.println("main thread hit bar 6");s
         }
         try {   main_barr.await();  } catch (Exception e) {}
 

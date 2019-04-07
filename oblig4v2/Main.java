@@ -8,18 +8,30 @@ public class Main {
 
     public static void main(String[] args) {
         // java Main {n} {seed} {numBits} {test-flag}
-        if(args.length < 3){
-            System.out.println("The correct way to run this program:");
-            System.out.println("\tjava Main {n} {seed} {numBits} {test}(optional)");
+        
+        if(args.length == 4 && args[3].equals("test-para")){
+            System.out.println("Running test parallel version");
+            int processors = Runtime.getRuntime().availableProcessors();
+            int n = Integer.valueOf(args[0]);
+            int seed = Integer.valueOf(args[1]);
+            int numBits = Integer.valueOf(args[2]);
+            int[] org = Oblig4Precode.generateArray(n, seed);
+            int[] para_res = Parallel.sort(org, numBits, processors);
+            Oblig4Precode.saveResults(Oblig4Precode.Algorithm.PARA, seed, para_res);
             System.exit(0);
         }
-        
-        if(args.length == 4 && args[3].equals("test")){
-            System.out.println("Running tests");
+        else if(args.length == 4 && args[3].equals("test-seq")){
+            System.out.println("Running test sequential version");
+            int n = Integer.valueOf(args[0]);
+            int seed = Integer.valueOf(args[1]);
+            int numBits = Integer.valueOf(args[2]);
+            int[] org = Oblig4Precode.generateArray(n, seed);
+            int[] seq_res = Sequential.sort(org, numBits);
+            Oblig4Precode.saveResults(Oblig4Precode.Algorithm.SEQ, seed, seq_res);
             System.exit(0);
         }
         else if(args.length == 3){
-            int NUM_RUNS = 1;
+            int NUM_RUNS = 7;
             int n = Integer.valueOf(args[0]);
             int seed = Integer.valueOf(args[1]);
             int numBits = Integer.valueOf(args[2]);
@@ -43,8 +55,8 @@ public class Main {
                 System.gc();
             }
             System.out.println("\nRunning parallel");
-            // int processors = Runtime.getRuntime().availableProcessors();
-            int processors = 2;
+            int processors = Runtime.getRuntime().availableProcessors();
+            // int processors = 2;
             for (int i = 0; i < NUM_RUNS; i++) {
                 long para_time_start = System.nanoTime();
                 int[] para_res = Parallel.sort(org, numBits, processors);
@@ -55,14 +67,19 @@ public class Main {
                 System.gc();
             }
     
-            // Arrays.sort(para_times);
-            // Arrays.sort(seq_times);
-            // double seq_median = seq_times[NUM_RUNS / 2 + 1];
-            // double para_median = para_times[NUM_RUNS / 2 + 1];
-            // double ratio = seq_median / para_median;
-            // System.out.printf("\nSequential median: %f\nParallel  median: %f\n", seq_median, para_median);
-            // System.out.printf("Speed up ratio: %f\n", ratio);
+            Arrays.sort(para_times);
+            Arrays.sort(seq_times);
+            double seq_median = seq_times[NUM_RUNS / 2 + 1];
+            double para_median = para_times[NUM_RUNS / 2 + 1];
+            double ratio = seq_median / para_median;
+            System.out.printf("\nSequential median: %f ms\nParallel  median: %f ms\n", seq_median, para_median);
+            System.out.printf("Speed up ratio: %f\n", ratio);
 
+        }
+        else{
+            System.out.println("The correct way to run this program:");
+            System.out.println("\tjava Main {n} {seed} {numBits} {test}(optional)");
+            System.exit(0);
         }
 
 
