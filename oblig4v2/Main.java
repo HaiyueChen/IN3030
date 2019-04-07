@@ -7,39 +7,63 @@ import java.util.LinkedList;
 public class Main {
 
     public static void main(String[] args) {
-        
-        // for (int i = 0; i < 8; i++) {
-        //     System.out.printf("N = %d\n", (int) Math.pow(10,  i + 1));
-        //     int[] org = Oblig4Precode.generateArray((int) Math.pow(10,  i + 1), 10);
-        //     System.out.println("parasort");
-        //     int[] para_res = Parallel.sort(org, 8, 8);
-        //     System.out.println("seq sort");
-        //     int[] seq_res = Sequential.sort(org, 8);
-        //     System.out.println(Arrays.equals(seq_res, para_res));
-        //     System.gc();
-        // }
-        double[] para_times = new double[13];
-        double[] seq_times = new double[13];
-        
-        int[] org = Oblig4Precode.generateArray(100000000, 25);
-        System.out.println("Seq start");
-        for (int i = 0; i < 13; i++) {
-            long seq_time_start = System.nanoTime();
-            int[] seq_res = Sequential.sort(org, 8);
-            seq_times[i] = (double) (System.nanoTime() - seq_time_start) / 1000000;
-            System.gc();
+        // java Main {n} {seed} {numBits} {test-flag}
+        if(args.length < 3){
+            System.out.println("The correct way to run this program:");
+            System.out.println("\tjava Main {n} {seed} {numBits} {test}(optional)");
+            System.exit(0);
         }
-        System.out.println("para start");
-        for (int i = 0; i < 13; i++) {
-            long para_time_start = System.nanoTime();
-            int[] para_res = Parallel.sort(org, 8, 8);
-            para_times[i] = (double) (System.nanoTime() - para_time_start) / 1000000;   
-            System.gc();
+        
+        if(args.length == 4 && args[3].equals("test")){
+            System.out.println("Running tests");
+            System.exit(0);
         }
+        else if(args.length == 3){
+            int NUM_RUNS = 1;
+            int n = Integer.valueOf(args[0]);
+            int seed = Integer.valueOf(args[1]);
+            int numBits = Integer.valueOf(args[2]);
+            
+            System.out.printf("Number of runs: %d \nN: %d\nSeed: %d\nNumber of bits: %d\n", NUM_RUNS, n, seed, numBits);
+            
+            double[] para_times = new double[NUM_RUNS];
+            double[] seq_times = new double[NUM_RUNS];
+            
+            int[] org = Oblig4Precode.generateArray(n, seed);
+            int[] correct = org.clone();
+            Arrays.sort(correct);
 
-        Arrays.sort(para_times);
-        Arrays.sort(seq_times);
-        System.out.println(seq_times[7] / para_times[7]);
+            System.out.println("\nRunning sequential");
+            for (int i = 0; i < NUM_RUNS; i++) {
+                long seq_time_start = System.nanoTime();
+                int[] seq_res = Sequential.sort(org, numBits);
+                seq_times[i] = (double) (System.nanoTime() - seq_time_start) / 1000000;
+                System.out.printf("Sequential run: %d\tRuntime: %f ms\t", i + 1, seq_times[i]);
+                System.out.println("Correct: " + Arrays.equals(seq_res, correct));
+                System.gc();
+            }
+            System.out.println("\nRunning parallel");
+            // int processors = Runtime.getRuntime().availableProcessors();
+            int processors = 2;
+            for (int i = 0; i < NUM_RUNS; i++) {
+                long para_time_start = System.nanoTime();
+                int[] para_res = Parallel.sort(org, numBits, processors);
+                para_times[i] = (double) (System.nanoTime() - para_time_start) / 1000000;
+                System.out.printf("Parallel   run: %d\tRuntime: %f ms\t", i + 1, para_times[i]);
+                System.out.println("Correct: " + Arrays.equals(para_res, correct));
+                // test_increasing(para_res);
+                System.gc();
+            }
+    
+            // Arrays.sort(para_times);
+            // Arrays.sort(seq_times);
+            // double seq_median = seq_times[NUM_RUNS / 2 + 1];
+            // double para_median = para_times[NUM_RUNS / 2 + 1];
+            // double ratio = seq_median / para_median;
+            // System.out.printf("\nSequential median: %f\nParallel  median: %f\n", seq_median, para_median);
+            // System.out.printf("Speed up ratio: %f\n", ratio);
+
+        }
 
 
     }

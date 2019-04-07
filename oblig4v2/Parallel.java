@@ -85,6 +85,9 @@ public class Parallel {
             workers[workers.length - 1].set_shift(shift);
             workers[workers.length - 1].sum_column_start = sum_column_start;
             workers[workers.length - 1].sum_column_length = sum_column_length + sum_column_rest;
+            // for (Worker w : workers) {
+                // System.out.println(w.mask_len);
+            // }
 
             // wait for threads to compute count-array
             // System.out.println("main thread hit bar 2");s
@@ -99,8 +102,7 @@ public class Parallel {
                 digitPointers.getAndAdd(j, sum);
                 sum += sum_count[j];
             }
-            // System.out.println("Index table: " + Arrays.toString(digitPointers));
-            // TODO assign threads to move the ints
+            System.out.println("Index table: " + digitPointers.toString());
             for (int j = 0; j < workers.length; j++) {
                 workers[j].set_table_params(digitPointers);
             }

@@ -36,6 +36,7 @@ public class Worker implements Runnable {
         this.main_barr = main_barr;
         this.thread_barr = thread_barr;
         this.result_bucket = result_bucket;
+        // System.out.printf("Thread: %d Start: %d END: %d\n", id, segment_start, segment_start + segment_length);
     }
 
     @Override
