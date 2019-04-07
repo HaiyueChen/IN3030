@@ -72,7 +72,7 @@ public class Main {
             double seq_median = seq_times[NUM_RUNS / 2 + 1];
             double para_median = para_times[NUM_RUNS / 2 + 1];
             double ratio = seq_median / para_median;
-            System.out.printf("\nSequential median: %f ms\nParallel  median: %f ms\n", seq_median, para_median);
+            System.out.printf("\nSequential median: %f ms\nParallel  median: %f ms \t\n", seq_median, para_median);
             System.out.printf("Speed up ratio: %f\n", ratio);
 
         }
