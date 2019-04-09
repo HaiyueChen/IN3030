@@ -64,8 +64,6 @@ public class Parallel {
                 w.set_sum_count(sum_count);
                 w.set_mask_len(bits[i]);
                 w.set_shift(shift);
-                w.sum_column_start = sum_column_start;
-                w.sum_column_length = sum_column_length;
                 sum_column_start += sum_column_length;
             }
             workers[workers.length - 1].set_count((1 << bits[i]));
@@ -73,8 +71,6 @@ public class Parallel {
             workers[workers.length - 1].set_sum_count(sum_count);
             workers[workers.length - 1].set_mask_len(bits[i]);
             workers[workers.length - 1].set_shift(shift);
-            workers[workers.length - 1].sum_column_start = sum_column_start;
-            workers[workers.length - 1].sum_column_length = sum_column_length + sum_column_rest;
 
             // wait for threads to compute count-array
             try {   main_barr.await();  } catch (Exception e) {}

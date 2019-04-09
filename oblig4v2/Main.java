@@ -12,6 +12,7 @@ public class Main {
         if(args.length == 4 && args[3].equals("test-para")){
             System.out.println("Running test parallel version");
             int processors = Runtime.getRuntime().availableProcessors();
+            
             int n = Integer.valueOf(args[0]);
             int seed = Integer.valueOf(args[1]);
             int numBits = Integer.valueOf(args[2]);
@@ -56,7 +57,7 @@ public class Main {
             }
             System.out.println("\nRunning parallel");
             int processors = Runtime.getRuntime().availableProcessors();
-            // int processors = 2;
+            // int processors = 4;
             for (int i = 0; i < NUM_RUNS; i++) {
                 long para_time_start = System.nanoTime();
                 int[] para_res = Parallel.sort(org, numBits, processors);
