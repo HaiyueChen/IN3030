@@ -27,8 +27,7 @@ public class Sequential {
         this.primes = this.sieve.findPrimes();
         
         for (int i = 0; i < 100; i++) {
-            this.to_factor[i] = (long)upper_limit;
-            upper_limit = (long)upper_limit - 1;
+            this.to_factor[i] = (long) -- upper_limit;
         }
         // System.out.println(Arrays.toString(primes));
     }

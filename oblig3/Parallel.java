@@ -17,9 +17,7 @@ public class Parallel {
     public int thread_count;
     public ParaSieve paraSieve;
     public Oblig3Precode writer;
-    // public int n;
     public int[] primes;
-    // public long[] to_factor = new long[100];
     public long[] to_factor = new long[100];
 
     public static Parallel init(int n, int thread_count){
@@ -40,7 +38,7 @@ public class Parallel {
         // System.out.println(Arrays.toString(primes));
         long upper_limit = (long) n*n;
         for (int i = 0; i < 100; i++) {
-            this.to_factor[i] = upper_limit--;
+            this.to_factor[i] = -- upper_limit;
         }
 
     }
@@ -208,11 +206,6 @@ class FactorMonitor {
                 this.started = true;
             }
 
-            // if(prev == current_base.get()){
-                // try { 
-                    // wait_for_work.await();} catch (Exception e) {}
-            // }
-            // working_threads ++;
             return this.current_base;
         }
         finally{
@@ -223,14 +216,9 @@ class FactorMonitor {
 
     public void add_factor(long base, ArrayList<Long> factors, int id){
         lock.lock();
-        try {
-            // Thread.sleep(500);
-        } catch (Exception e) {}
-
         try{
             working_threads --;
             if(working_threads == 0){
-                // System.out.printf("ID: %d FINISHING\n", id);
                 if (factors.size() > 0) {
                     for (int i = 0; i < factors.size(); i++) {
                         this.result_bucket.get(current_base).add(factors.get(i));
@@ -248,9 +236,7 @@ class FactorMonitor {
                 wait_for_work.signalAll();
             }
             else{
-                // System.out.printf("ID: %d waiting\n", id);
                 if(factors.size() > 0) {
-                    // this.dead_end = false;
                     for (int i = 0; i < factors.size(); i++) {
                         this.result_bucket.get(current_base).add(factors.get(i));
                     }
@@ -268,14 +254,10 @@ class FactorMonitor {
     private void set_next_task(){
         if(this.factor_index == this.to_factor.length){
             this.current_base = (long) 0;
-            // this.current_to_factor = 0;
-            // this.current_base.set(current_to_factor);
             return;
         }
-        // this.current_to_factor = this.to_factor[this.factor_index];
         this.current_base = this.to_factor[this.factor_index];
         this.factor_index ++;
-        // this.current_base.set(current_to_factor);
     }
 
     

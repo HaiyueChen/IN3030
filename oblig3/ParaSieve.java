@@ -25,44 +25,50 @@ public class ParaSieve {
     private void start() {
         
         Thread[] threads = new Thread[this.thread_count];
-        int value_start = 0;
+        int value_start = 3;
         int value_length = n / this.thread_count;
         
-        int work_size = (this.monitor.initial_primes.length / thread_count) + 1;
-        int[][] all_the_work = new int[thread_count][work_size];
-        int primes_index = 0;
-        for (int i = 0; i < work_size; i++) {
-            for (int j = 0; j < thread_count; j++) {
-                if(primes_index == this.monitor.initial_primes.length){
-                    all_the_work[j][i] = 0;
-                }
-                else{
-                    int prime_number = this.monitor.initial_primes[primes_index];
-                    all_the_work[j][i] = prime_number;
-                    primes_index ++;
+        // int work_size = (this.monitor.initial_primes.length / thread_count) + 1;
+        // int[][] all_the_work = new int[thread_count][work_size];
+        // int primes_index = 0;
+        // for (int i = 0; i < work_size; i++) {
+        //     for (int j = 0; j < thread_count; j++) {
+        //         if(primes_index == this.monitor.initial_primes.length){
+        //             all_the_work[j][i] = 0;
+        //         }
+        //         else{
+        //             int prime_number = this.monitor.initial_primes[primes_index];
+        //             all_the_work[j][i] = prime_number;
+        //             primes_index ++;
 
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
 
         for (int i = 0; i < this.thread_count - 1; i++) {
-            int[] work = all_the_work[i];
+            int value_end = value_start + value_length;
+            int rest = value_end % 16;
+            value_end += 16 - rest;
+            if (value_end > n) {
+                value_end = n;
+            }
+            // int[] work = all_the_work[i];
             threads[i] = new Thread(new SieveWorker(i,
                                     this.monitor, 
                                     value_start, 
-                                    value_length,
-                                    work
+                                    value_end,
+                                    this.monitor.initial_primes
                                     ));
-            value_start += value_length;
+            value_start = value_end + 1;
         }
-        int[] work = all_the_work[this.thread_count - 1];
+        // int[] work = all_the_work[this.thread_count - 1];
         threads[this.thread_count - 1] = new Thread(new SieveWorker(this.thread_count - 1,
                                                                     this.monitor, 
                                                                     value_start, 
-                                                                    n - value_start,
-                                                                    work
+                                                                    n,
+                                                                    this.monitor.initial_primes
                                                                     ));
-
+        
         for (int i = 0; i < this.thread_count; i++) {
             threads[i].start();
         }
@@ -81,7 +87,7 @@ public class ParaSieve {
 
 
 class SieveMonitor{
-    public boolean[] booArray;
+    public byte[] byteArray;
     public int n;
     public int squareRootN;
     public int[] initial_primes;
@@ -98,29 +104,12 @@ class SieveMonitor{
 
     public SieveMonitor(int n){
         this.n = n;
-        int cells = n / 2 + 1;
-        this.booArray = new boolean[cells];
-        // System.out.println(booArray.length);
+        int cells = n / 16 + 1;
+        this.byteArray = new byte[cells];
         this.squareRootN = (int) Math.sqrt(n) + 1;
         SequentialSieve seqSieve = new SequentialSieve(squareRootN + 1);
         this.initial_primes = seqSieve.findPrimes();
-        // System.out.println(Arrays.toString(initial_primes));
     }
-
-    // public int fetch_more_work(int id){
-    //     lock.lock();
-    //     try{
-    //         if(this.currentPrime_index > this.initial_primes.length - 1){
-    //             return 0;
-    //         }
-    //         else{
-    //             return initial_primes[currentPrime_index++]; 
-    //         }
-    //     }
-    //     finally{
-    //         lock.unlock();
-    //     }
-    // }
 
     public void done_phase_one(){
         lock.lock();
@@ -139,7 +128,7 @@ class SieveMonitor{
     }
 
     public int[] get_primes(){
-        int num_primes = this.prime_count.get();
+        int num_primes = this.prime_count.get() + 1;
 
         int[] primes = new int[num_primes];
         primes[0] = 2;
@@ -165,8 +154,9 @@ class SieveMonitor{
         if((i % 2) == 0){
             return false;
         }
-        int cell = i / 2;
-        return !booArray[cell];
+        int byteCell = i / 16;
+        int bit = (i / 2) % 8;
+        return (byteArray[byteCell] & (1 << bit)) == 0;
     }
 
 }
