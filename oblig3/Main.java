@@ -96,7 +96,7 @@ public class Main {
             System.out.println("\nMedians:");
             System.out.println("Sequential: " + seq_sieve_times[4] + " ms");
             System.out.println("Parallel: " + para_sieve_times[4] + " ms");
-            System.out.println("Speed up ratio: " + (double) ((seq_sieve_times[4] / para_sieve_times[4]) - 1));
+            System.out.println("Speed up ratio: " + (double) ((seq_sieve_times[4] / para_sieve_times[4])));
             System.gc();
 
 
@@ -132,7 +132,7 @@ public class Main {
             System.out.println("\nMedians:");
             System.out.println("Sequential: " + seq_factor_times[4] + " ms");
             System.out.println("Parallel: " + para_factor_times[4] + " ms");
-            System.out.println("Speed up ratio: " + (double) ((seq_factor_times[4] / para_factor_times[4]) - 1));
+            System.out.println("Speed up ratio: " + (double) ((seq_factor_times[4] / para_factor_times[4])));
         }
 
 

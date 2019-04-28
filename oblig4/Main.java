@@ -8,38 +8,13 @@ public class Main {
 
     public static void main(String[] args) {
         
-        // for (int i = 0; i < 8; i++) {
-        //     System.out.printf("N = %d\n", (int) Math.pow(10,  i + 1));
-        //     int[] org = Oblig4Precode.generateArray((int) Math.pow(10,  i + 1), 10);
-        //     System.out.println("parasort");
-        //     int[] para_res = Parallel.sort(org, 8, 8);
-        //     System.out.println("seq sort");
-        //     int[] seq_res = Sequential.sort(org, 8);
-        //     System.out.println(Arrays.equals(seq_res, para_res));
-        //     System.gc();
-        // }
-        double[] para_times = new double[7];
-        double[] seq_times = new double[7];
-        
-        int[] org = Oblig4Precode.generateArray(100000000, 10);
-        System.out.println("Seq start");
-        for (int i = 0; i < 7; i++) {
-            long seq_time_start = System.nanoTime();
-            int[] seq_res = Sequential.sort(org, 12);
-            seq_times[i] = (double) (System.nanoTime() - seq_time_start) / 1000000;
-            System.gc();
-        }
-        System.out.println("para start");
-        for (int i = 0; i < 7; i++) {
-            long para_time_start = System.nanoTime();
-            int[] para_res = Parallel.sort(org, 12, 4);
-            para_times[i] = (double) (System.nanoTime() - para_time_start) / 1000000;   
-            System.gc();
-        }
+        int[] org = Oblig4Precode.generateArray(100000, 10);
+        // int[] a1 = Arrays.copyOf(org, org.length);
+        // int[] a2 = Arrays.copyOf(a1, a1.length);
+        Parallel.sort(org, 8, 8);
+        findMax(org);
 
-        Arrays.sort(para_times);
-        Arrays.sort(seq_times);
-        System.out.println(seq_times[4] / para_times[4]);
+
 
 
     }

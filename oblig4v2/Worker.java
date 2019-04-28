@@ -20,10 +20,8 @@ public class Worker implements Runnable {
     public int[] sum_count;
     public int mask_len;
     public int shift;
-    public int sum_column_start;
-    public int sum_column_length;
-    public AtomicIntegerArray table;
 
+    
     public Worker(int id, int[] a, int[] b, int segment_start, int segment_length, CyclicBarrier main_barr, int[] result_bucket) {
         this.id = id;
         this.a = a;
