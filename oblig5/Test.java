@@ -5,14 +5,18 @@ import java.util.Arrays;
  */
 public class Test {
 
-    static int num_point = 10;
+    static int num_point = 30;
     public static void main(String[] args) {
-        Oblig5 test = new Oblig5(num_point);
-        IntList list = new IntList(num_point);
-        // System.out.println(Arrays.toString(test.x));
-        list.add(1);
-        list.add(1);
-        list.add(1);
-        TegnUt t = new TegnUt(test, list);
+        if (args.length == 1) {
+            int count = Integer.valueOf(args[0]);
+            Oblig5 test = new Oblig5(count);
+            IntList test_list = test.seqMethod();
+            TegnUt t = new TegnUt(test, test_list);    
+        }
+        else{
+            Oblig5 test = new Oblig5(num_point);
+            IntList test_list = test.seqMethod();
+            TegnUt t = new TegnUt(test, test_list);
+        }
     }
 }
