@@ -20,7 +20,7 @@ public class Sequential {
                 low_x = x[i];
             }
         }
-        
+        System.out.printf("Index high-x: %d val: %d \t Index low-x: %d val: %d\n", index_high_x, high_x, index_low_x, low_x);
         int min_dist_right_index = 0;
         int max_dist_left_index = 0;
         double min_dist_right = dist_to_line(index_high_x, index_low_x, min_dist_right_index, x, y);
@@ -36,28 +36,28 @@ public class Sequential {
                 max_dist_left_index = i;
             }
         }
+        System.out.printf("Index upper point: %d dist: %f \t Index lower point: %d dist: %f\n", min_dist_right_index, min_dist_right, max_dist_left_index, max_dist_left);
         
-        
-        index_list.add(index_high_x);
-        // seek top_right
-        IntList top_right = sek_Rek_Right(index_high_x, min_dist_right_index, x, y);
-        index_list.append(top_right);
-        index_list.add(min_dist_right_index);
+        // index_list.add(index_high_x);
+        // // seek top_right
+        // IntList top_right = sek_Rek_Right(index_high_x, min_dist_right_index, x, y);
+        // index_list.append(top_right);
+        // index_list.add(min_dist_right_index);
 
-        //seek top left
-        IntList top_left = sek_Rek_Right(min_dist_right_index, index_low_x, x, y);
-        index_list.append(top_left);
-        index_list.add(index_low_x);
+        // //seek top left
+        // IntList top_left = sek_Rek_Right(min_dist_right_index, index_low_x, x, y);
+        // index_list.append(top_left);
+        // index_list.add(index_low_x);
         
-        //seek bottom left
-        IntList bottom_left = sek_Rek_Right(index_low_x, max_dist_left_index, x, y);
-        index_list.append(bottom_left);
-        index_list.add(max_dist_left_index);
+        // //seek bottom left
+        // IntList bottom_left = sek_Rek_Right(index_low_x, max_dist_left_index, x, y);
+        // index_list.append(bottom_left);
+        // index_list.add(max_dist_left_index);
 
-        //seek bottom right
-        IntList bottom_right = sek_Rek_Right(max_dist_left_index, index_high_x, x, y);
-        index_list.append(bottom_right);
-        index_list.add(index_high_x);
+        // //seek bottom right
+        // IntList bottom_right = sek_Rek_Right(max_dist_left_index, index_high_x, x, y);
+        // index_list.append(bottom_right);
+        // index_list.add(index_high_x);
 
         return index_list;
     }
