@@ -7,6 +7,9 @@ public class Parallel {
 
     
     public static IntList get_enfolding(int[] x, int[] y, int num_threads){
+        if (num_threads < 4) {
+            num_threads = 4;
+        }
         IntList enfolding = new IntList((int)Math.sqrt(x.length));
         Thread[] threads = new Thread[num_threads];
         CyclicBarrier barr = new CyclicBarrier(num_threads + 1);
@@ -70,6 +73,7 @@ public class Parallel {
             }
         }
         System.out.printf("Index upper point: %d dist: %f \t Index lower point: %d dist: %f\n", min_dist_right_index, min_dist_right, max_dist_left_index, max_dist_left);
+        
 
         return enfolding;
     }
