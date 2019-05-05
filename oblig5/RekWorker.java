@@ -56,7 +56,7 @@ public class RekWorker implements Runnable {
         if (found_outer) {
             // System.out.println(free_thread_count.get());
             if (free_thread_count.get() > 0) {
-                System.out.println("Starting new thread");
+                // System.out.println("Starting new thread");
                 free_thread_count.getAndDecrement();
                 RekWorker child_worker = new RekWorker(this.x, this.y, free_thread_count);
                 child_worker.index_line_start = min_dist_right_index;

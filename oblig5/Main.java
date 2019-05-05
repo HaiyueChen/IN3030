@@ -5,31 +5,56 @@ import java.util.Arrays;
  */
 public class Main {
     
-    static int num_punkt = 250000000;
     static int num_runs = 7;
     public static void main(String[] args) {
-        // test_seq();
-        test_para();
-        // run_times();
+        if (args.length != 2) {
+            System.out.println("The correct way to run this program:");
+            System.out.println("\tjava Main {flag} {n}");
+            System.exit(0);
+        }
+        String flag = args[0];
+        int n = Integer.valueOf(args[1]);
+        if (flag.equals("test-seq")) {
+            test_seq(n);
+        }
+        else if (flag.equals("test-para")) {
+            test_para(n);
+        }
+        else if (flag.equals("run")) {
+            run_times(n);
+        }
+        else{
+            System.out.println("Did not recognize the flag: " + flag);
+            System.out.println("Please try again");
+            System.exit(0);
+        }
     }
 
-    public static void test_seq(){
-        int test_num = 200;
+    public static void test_seq(int test_num){
+        if (test_num > 5000) {
+            System.out.println("The GUI is not suitable for n greater than 5000.");
+            System.out.println("Running the test with n = 5000");
+            test_num = 5000;
+        }
         NPunkter17 gen_punkt = new NPunkter17(test_num);
         Oblig5 test_seq = new Oblig5(test_num);
         IntList test_list = test_seq.seqMethod();
         TegnUt t = new TegnUt(test_seq, test_list);
     }
 
-    public static void test_para(){
-        int test_num = 1000;
+    public static void test_para(int test_num){
+        if (test_num > 5000) {
+            System.out.println("The GUI is not suitable for n greater than 5000.");
+            System.out.println("Running the test with n = 5000");
+            test_num = 5000;
+        }
         NPunkter17 gen_punkt = new NPunkter17(test_num);
         Oblig5 test_para = new Oblig5(test_num);
         IntList test_list = test_para.paraMethod(Runtime.getRuntime().availableProcessors());
         TegnUt t = new TegnUt(test_para, test_list);
     }
 
-    public static void run_times() {
+    public static void run_times(int num_punkt) {
         NPunkter17 gen_punkt = new NPunkter17(num_punkt);
         int[] x = new int[num_punkt];
         int[] y = new int[num_punkt];
@@ -38,22 +63,25 @@ public class Main {
 
         double[] seq_times = new double[num_runs];
         double[] para_times = new double[num_runs];
+        
+        IntList seq_res = null;
+        System.out.println("\nRunning sequential");
         for (int i = 0; i < num_runs; i++) {
-            System.out.println("\nStarting run: " + (i + 1));
-
-            System.out.println("Running sequential");
             long seq_start = System.nanoTime();
-            IntList seq_res = Sequential.get_enfolding(x, y);
+            seq_res = Sequential.get_enfolding(x, y);
             double seq_time = (System.nanoTime() - seq_start) / 1000000;
             seq_times[i] = seq_time;
-            
-            System.out.println("Running parallel");
+            System.out.printf("Sequential run: %d\ttime: %f ms\n", i+1, seq_time);    
+        }
+
+        System.out.println("\nRunning parallel");
+        for (int i = 0; i < num_runs; i++) {
             long para_start = System.nanoTime();
             IntList para_res = Parallel.get_enfolding(x, y, 8);
             double para_time = (System.nanoTime() - para_start) / 1000000;
             para_times[i] = para_time;             
-            System.out.println("Seq == Para: " + seq_res.equals(para_res));
-            System.out.println("Threads used: " + RekWorker.count.get());
+            System.out.printf("Parallel   run: %d\ttime: %f ms\tThreads used: %d\tCorrect: %b\n", i+1, para_time, RekWorker.count.get(), seq_res.equals(para_res));
+            
         }
 
         Arrays.sort(seq_times);
