@@ -16,6 +16,9 @@ public class Worker implements Runnable {
     public int[] indices;
     public double[][] dist_buckets;
 
+    public IntList above_line;
+    public IntList under_line;
+
     public Worker(int id, CyclicBarrier barr, int[] x, int[] y, int section_start, int section_end,
             int[][] buckets, int[] indices, double[][] dist_buckets) {
         this.id = id;
@@ -27,6 +30,8 @@ public class Worker implements Runnable {
         this.buckets = buckets;
         this.indices = indices;
         this.dist_buckets = dist_buckets;
+        this.above_line = new IntList((section_end - section_start) / 2);
+        this.under_line = new IntList((section_end - section_start) / 2);
     }
 
     @Override
@@ -56,10 +61,16 @@ public class Worker implements Runnable {
         try {   barr.await();   } catch (Exception e) {}
         int min_dist_right_index = 0;
         int max_dist_left_index = 0;
-        double min_dist_right = dist_to_line(index_high_x, index_low_x, min_dist_right_index, x, y);
+        double min_dist_right = dist_to_line(index_high_x, index_low_x, min_dist_right_index);
         double max_dist_left = min_dist_right;
         for (int i = section_start; i < section_end; i++) {
-            double new_dist_to_line = dist_to_line(indices[0], indices[1], i, x, y);
+            double new_dist_to_line = dist_to_line(indices[0], indices[1], i);
+            if (new_dist_to_line < 0) {
+                above_line.add(i);
+            }
+            if (new_dist_to_line > 0) {
+                under_line.add(i);
+            }
             if (new_dist_to_line < min_dist_right) {
                 min_dist_right = new_dist_to_line;
                 min_dist_right_index = i;
@@ -76,15 +87,15 @@ public class Worker implements Runnable {
         try {   barr.await();   } catch (Exception e) {}
     }
 
-    public static double dist_to_line(int index_line_start, int index_line_end, int index_new_point, int[] x, int[] y){
-        int x1 = x[index_line_start];
-        int y1 = y[index_line_start];
+    public double dist_to_line(int index_line_start, int index_line_end, int index_new_point){
+        int x1 = this.x[index_line_start];
+        int y1 = this.y[index_line_start];
         
-        int x2 = x[index_line_end];
-        int y2 = y[index_line_end];
+        int x2 = this.x[index_line_end];
+        int y2 = this.y[index_line_end];
         
-        int x_new = x[index_new_point];
-        int y_new = y[index_new_point];
+        int x_new = this.x[index_new_point];
+        int y_new = this.y[index_new_point];
         
         int a = y1 - y2;
         int b = x2 - x1;

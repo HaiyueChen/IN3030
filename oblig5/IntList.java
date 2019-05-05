@@ -1,3 +1,4 @@
+import java.util.Arrays;
 
 class IntList {
     int [] data;
@@ -44,5 +45,8 @@ class IntList {
     int size() {
        return len;
     } //end size
- 
+    
+    boolean equals(IntList other){
+       return Arrays.equals(this.data, other.data);
+    }
  } // end class IntList
